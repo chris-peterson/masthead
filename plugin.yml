@@ -1,0 +1,53 @@
+# Canonical descriptor for the masthead plugin: edit here, never plugin.json.
+# shipyard's project job projects this into .claude-plugin/plugin.json and the
+# marketplace catalog (the suite: block), and commits the result to the branch.
+
+name: masthead
+version: 0.0.0
+description: "Bootstraps a documentation hub for a repo and keeps it current, on the docs engine you choose, so the people who come next can find how it works and what to watch out for."
+author: chris-peterson
+repository: https://github.com/chris-peterson/masthead
+icon: .claude-plugin/icon.svg
+license: MIT
+keywords: [docs, docsify, github-pages, documentation, claude-code]
+
+validate:
+  accept:
+    - warning: root
+      path: CLAUDE.md
+      because: >-
+        CLAUDE.md at the root is this repo's own agent instructions, not context
+        the plugin ships. It points at AGENTS.md, which every agent reads.
+
+marketplace:
+  category: documentation
+  homepage: https://chris-peterson.github.io/masthead/#/
+
+events:
+  publishes:
+    - key: content.routed
+      when: >-
+        masthead was asked to place a piece of content in the documentation hub
+        and decided it belongs to another audience instead: maintainers (build
+        steps, repo layout, anything that needs a checkout to act on) or agents
+        (instructions for whoever is changing the code). Fires once per piece of
+        content masthead turns away, so the agent can hand it to whoever places
+        content for that audience
+      fields:
+        tier: the audience the content belongs to, agent or maintainer
+        path: the file the content was in, or would have gone to, relative to the repo root
+        title: the content's heading, where it has one
+        reason: which criterion moved it out of the hub, in a sentence
+
+suite:
+  group: charts
+  gloss: "masthead: put your docs where readers can see them."
+  pitch: "Your repo has docs but no front door? Raise a hub readers can find, and keep it current as the code moves."
+  what: "Stands up a documentation hub for a repo (home page, navigation, and a deploy that publishes on every push) and keeps it current as the code changes. The docs engine (e.g. docsify) is an adapter, so the hub isn't tied to one tool. Pages are written for the person who comes next: how the thing works, and where the dragons are."
+  # >>> shipyard:describe — generated from source by `shipyard gen-describe`; do not edit >>>
+  describe: {}
+  # <<< shipyard:describe <<<
+
+docs:
+  code_languages: [bash, yaml, markdown]
+  mermaid: false
