@@ -1,6 +1,6 @@
 {
   "name": "masthead",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Bootstraps a documentation hub for a repo and keeps it current, on the docs engine you choose, so the people who come next can find how it works and what to watch out for.",
   "author": {
     "name": "chris-peterson"
