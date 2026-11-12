@@ -47,7 +47,9 @@ suite:
   cmds:
     - ["/masthead:bootstrap", "Stand up a docs hub for a repo, with a deploy"]
   # >>> shipyard:describe — generated from source by `shipyard gen-describe`; do not edit >>>
-  describe: {}
+  describe:
+    skills:
+      bootstrap: This skill should be used when the user wants a documentation hub for a repo, such as "/masthead:bootstrap", "set up a docs site for this repo", "give this project a pages site", "bootstrap docsify here", "publish these docs to GitHub Pages", or "add a docs hub".
   # <<< shipyard:describe <<<
 
 docs:
