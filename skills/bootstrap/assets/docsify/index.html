@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{PROJECT_NAME}}</title>
+  <meta name="description" content="{{PROJECT_NAME}} documentation">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="content-language" content="en">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.min.css">
+  <style>
+    /* ── Palettes (always available) ─────────────────────── */
+    :root {
+      --dracula-bg:         #282a36;
+      --dracula-current:    #44475a;
+      --dracula-fg:         #f8f8f2;
+      --dracula-comment:    #6272a4;
+      --dracula-cyan:       #8be9fd;
+      --dracula-green:      #50fa7b;
+      --dracula-orange:     #ffb86c;
+      --dracula-pink:       #ff79c6;
+      --dracula-purple:     #bd93f9;
+      --dracula-red:        #ff5555;
+      --dracula-yellow:     #f1fa8c;
+
+      --alucard-bg:         #f8f8f2;
+      --alucard-current:    #e6e6e0;
+      --alucard-fg:         #282a36;
+      --alucard-comment:    #6272a4;
+      --alucard-cyan:       #0b7c8c;
+      --alucard-green:      #19822a;
+      --alucard-orange:     #bb5012;
+      --alucard-pink:       #c33e74;
+      --alucard-purple:     #784bc7;
+      --alucard-red:        #d43535;
+      --alucard-yellow:     #7f7113;
+    }
+
+    /* ── Theme switching (only sets color-scheme) ────────── */
+    :root, [data-theme="dark"]  { color-scheme: dark; }
+    [data-theme="light"]        { color-scheme: light; }
+
+    /* ── Semantic mappings — light-dark(light, dark) ──────
+         Every variable is defined once; forgetting a mode
+         is impossible because both values sit side-by-side. */
+    :root {
+      --sidebar-width:                     260px;
+      /* Zero out docsify-themeable's default sidebar padding so the nav's
+         scrollbar sits flush with the sidebar's right edge rather than inset
+         from it. The header, search, and nav-link rules below carry the
+         16px gutter instead. */
+      --sidebar-padding:                   0;
+      --sidebar-nav-padding:               8px 0;
+      --sidebar-nav-link-padding:          4px 12px;
+      --sidebar-name-font-family:          'JetBrains Mono', 'Courier New', monospace;
+      --base-background-color:             light-dark(var(--alucard-bg),      var(--dracula-bg));
+      --base-color:                        light-dark(var(--alucard-fg),      var(--dracula-fg));
+      --sidebar-background:                light-dark(#eeeee8,               #21222c);
+      --sidebar-nav-link-color:            light-dark(var(--alucard-fg),      var(--dracula-fg));
+      --sidebar-nav-link-color--active:    light-dark(var(--alucard-purple),  var(--dracula-purple));
+      --sidebar-nav-link-border-color--active: light-dark(var(--alucard-purple), var(--dracula-purple));
+      --sidebar-name-color:                light-dark(color-mix(in srgb, var(--alucard-pink) 80%, black), var(--dracula-pink));
+      /* Darkened in light mode: plain alucard-cyan is 3.9:1 on the table-row
+         and blockquote backgrounds. */
+      --link-color:                        light-dark(color-mix(in srgb, var(--alucard-cyan) 80%, black), var(--dracula-cyan));
+      --link-color--hover:                 light-dark(var(--alucard-purple),  var(--dracula-purple));
+      --heading-color:                     light-dark(var(--alucard-fg),      var(--dracula-fg));
+      --blockquote-border-color:           light-dark(var(--alucard-comment), var(--dracula-comment));
+      --blockquote-background:             light-dark(var(--alucard-current), var(--dracula-current));
+      --blockquote-color:                  light-dark(var(--alucard-fg),      var(--dracula-fg));
+      --code-inline-background:            light-dark(var(--alucard-current), var(--dracula-current));
+      --code-inline-color:                 light-dark(var(--alucard-purple),  var(--dracula-yellow));
+      /* Code-block fill must differ from the page background so the block
+         reads as a distinct box. In dark mode that means NOT --dracula-bg
+         (which equals --base-background-color) — use the darker #21222c, or
+         the copy button appears to float above bare text with no visible box. */
+      --code-theme-background:             light-dark(#eeeee8,               #21222c);
+      --code-theme-text:                   light-dark(var(--alucard-fg),      var(--dracula-fg));
+      --search-input-border-color:         light-dark(var(--alucard-comment), color-mix(in srgb, var(--dracula-comment) 50%, white));
+      --search-input-background-color:     light-dark(#ffffff,               var(--dracula-current));
+      --search-input-color:                light-dark(var(--alucard-fg),      var(--dracula-fg));
+      --search-result-keyword-color:       light-dark(var(--alucard-fg),      var(--dracula-bg));
+      --search-result-keyword-background:  var(--dracula-yellow);
+      --notice-tip-border-color:           light-dark(var(--alucard-green),   var(--dracula-green));
+      --notice-important-border-color:     light-dark(var(--alucard-pink),    var(--dracula-pink));
+      --notice-warning-border-color:       light-dark(var(--alucard-orange),  var(--dracula-orange));
+      /* [!NOTE] … [!CAUTION] alerts. The plugin's own colors are under 4.5:1
+         on one theme or the other. */
+      --alert-note-color:                  light-dark(var(--alucard-cyan),    var(--dracula-cyan));
+      --alert-tip-color:                   light-dark(var(--alucard-green),   var(--dracula-green));
+      --alert-important-color:             light-dark(var(--alucard-purple),  var(--dracula-purple));
+      --alert-warning-color:               light-dark(var(--alucard-orange),  var(--dracula-orange));
+      --alert-caution-color:               light-dark(var(--alucard-red),     var(--dracula-red));
+      --table-row-even-background:         light-dark(#ececec,               #2e303e);
+      --table-row-odd-background:          light-dark(var(--alucard-bg),      var(--dracula-bg));
+      --table-header-color:                light-dark(var(--alucard-fg),      var(--dracula-fg));
+      --table-header-background:           light-dark(#e0e0da,               var(--dracula-current));
+      /* Dracula's comment color is 1.9:1 on the --dracula-current input; the
+         lightened mix clears AA (4.65:1). */
+      --search-placeholder-color:          light-dark(var(--alucard-comment), color-mix(in srgb, var(--dracula-comment) 50%, white));
+      --search-icon-color:                 var(--search-placeholder-color);
+      /* docsify-themeable sizes the search row for its own 25px sidebar
+         padding (--search-input-margin: 0 -25px), which --sidebar-padding: 0
+         turns into a 25px overhang on each side. */
+      --search-margin:                     8px 0 0;
+      --search-padding:                    0;
+      --search-input-margin:               0;
+      /* The theme's magnifier is a background image with a fixed translucent
+         stroke that vanishes on the light input; .input-wrap::before draws a
+         themed one instead. */
+      --search-input-background-image:     none;
+      --search-clear-icon-color1:          var(--search-icon-color);
+      --search-clear-icon-color2:          var(--search-input-background-color);
+      --search-border-color:               light-dark(var(--alucard-current), var(--dracula-current));
+      --search-result-background:          light-dark(var(--alucard-bg),      var(--dracula-bg));
+      --search-result-color:               light-dark(var(--alucard-fg),      var(--dracula-fg));
+      --search-result-border-color:        light-dark(var(--alucard-current), var(--dracula-current));
+      --theme-icon-color:                  light-dark(var(--alucard-orange),  var(--dracula-yellow));
+      /* Accent gradient start — host-tinted by bootstrap.py (purple for
+         GitHub, orange for GitLab). The mid/end stay cyan/pink for both. */
+      --titlebar-accent-start:             {{TITLEBAR_ACCENT_START}};
+      --titlebar-accent-mid:               light-dark(var(--alucard-cyan),    var(--dracula-cyan));
+      --titlebar-accent-end:               light-dark(var(--alucard-pink),    var(--dracula-pink));
+      --toggle-bg:                         light-dark(rgba(0,0,0,0.08),      rgba(255,255,255,0.08));
+      --toggle-bg-hover:                   light-dark(rgba(0,0,0,0.12),      rgba(255,255,255,0.12));
+      --toggle-indicator:                  light-dark(rgba(255,255,255,0.95), rgba(255,255,255,0.12));
+      --toggle-active-color:               var(--theme-icon-color);
+      --toggle-inactive-color:             light-dark(var(--alucard-comment), color-mix(in srgb, var(--dracula-comment) 50%, white));
+      --copy-btn-bg:                       light-dark(rgba(0,0,0,0.06),       rgba(255,255,255,0.08));
+      --copy-btn-bg-hover:                 light-dark(rgba(0,0,0,0.12),       rgba(255,255,255,0.16));
+      --copy-btn-fg:                       light-dark(var(--alucard-comment), color-mix(in srgb, var(--dracula-comment) 50%, white));
+      --copy-btn-success-bg:               light-dark(rgba(25,130,42,0.14),   rgba(80,250,123,0.16));
+      --copy-btn-success-fg:               light-dark(var(--alucard-green),   var(--dracula-green));
+      /* Syntax tokens. docsify-themeable's dark theme hardcodes Prism token
+         colors for a dark fill, so light mode needs its own. Alucard hues sit
+         near 4.2:1 on the #eeeee8 code fill, so they are darkened to clear AA;
+         Dracula's comment color is lightened for the same reason. */
+      --code-token-comment:                light-dark(color-mix(in srgb, var(--alucard-comment) 80%, black), color-mix(in srgb, var(--dracula-comment) 70%, white));
+      --code-token-key:                    light-dark(color-mix(in srgb, var(--alucard-cyan)    80%, black), var(--dracula-cyan));
+      --code-token-keyword:                light-dark(color-mix(in srgb, var(--alucard-pink)    80%, black), var(--dracula-pink));
+      --code-token-string:                 light-dark(color-mix(in srgb, var(--alucard-yellow)  80%, black), var(--dracula-yellow));
+      --code-token-number:                 light-dark(color-mix(in srgb, var(--alucard-purple)  80%, black), var(--dracula-purple));
+      --code-token-function:               light-dark(color-mix(in srgb, var(--alucard-green)   80%, black), var(--dracula-green));
+      --code-token-variable:               light-dark(color-mix(in srgb, var(--alucard-orange)  80%, black), var(--dracula-orange));
+      --code-token-punctuation:            light-dark(var(--alucard-fg),      var(--dracula-fg));
+      --code-token-deleted:                light-dark(color-mix(in srgb, var(--alucard-red)     80%, black), var(--dracula-red));
+      /* Nodes given `class <node> highlight` in a mermaid diagram. Mermaid's
+         parser rejects var() in classDef, so CSS applies these instead. The
+         fill is a tint so the label color stays legible over the hatching. */
+      --diagram-highlight-fill:            light-dark(color-mix(in srgb, var(--alucard-orange) 30%, var(--alucard-bg)),
+                                                      color-mix(in srgb, var(--dracula-orange) 25%, var(--dracula-bg)));
+      --diagram-highlight-stroke:          light-dark(var(--alucard-orange),  var(--dracula-orange));
+      /* Icons drawn via mask-image so they recolor with button state. Stroke
+         color in the SVG is irrelevant — a mask keys off alpha, not paint. */
+      --icon-clipboard: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E");
+      --icon-search:    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='10.5' cy='10.5' r='7.5'/%3E%3Cline x1='21' y1='21' x2='15.8' y2='15.8'/%3E%3C/svg%3E");
+      --icon-check:     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    }
+
+    /* ── Element overrides the theme doesn't cover ───────── */
+    .markdown-section {
+      color: var(--base-color);
+    }
+    /* Heading scale: docsify-themeable shrinks h5/h6 below body size
+       (h6 ≈ 9px), which makes deeply-nested headings unreadable — e.g. a
+       catalog nesting tier > team > plugin lands real headings at h5/h6.
+       Enforce a scale that steps down but never drops below body, and size
+       backticked names relative to their heading rather than the small global
+       code size. */
+    .markdown-section h3 { font-size: 1.5rem; }
+    .markdown-section h4 { font-size: 1.25rem; }
+    .markdown-section h5 { font-size: 1.1rem; }
+    .markdown-section h6 { font-size: 1rem; }
+    .markdown-section h1 code, .markdown-section h2 code,
+    .markdown-section h3 code, .markdown-section h4 code,
+    .markdown-section h5 code, .markdown-section h6 code {
+      font-size: 0.9em;
+    }
+    .markdown-section table tr {
+      color: var(--base-color);
+    }
+    .markdown-section table tr:nth-child(2n) {
+      background-color: var(--table-row-even-background);
+    }
+    .markdown-section table tr:nth-child(2n+1) {
+      background-color: var(--table-row-odd-background);
+    }
+    .markdown-section table th {
+      color: var(--table-header-color);
+      background-color: var(--table-header-background);
+    }
+    /* Browsers break an ISO date after its hyphens once a wide neighbour
+       squeezes the column, so a date in a <time> stays on one line. */
+    .markdown-section time { white-space: nowrap; }
+    .markdown-section code {
+      color: var(--code-inline-color);
+      background-color: var(--code-inline-background);
+    }
+    .markdown-section pre code {
+      color: var(--code-theme-text);
+      background-color: var(--code-theme-background);
+    }
+    .markdown-section .token.comment,
+    .markdown-section .token.prolog,
+    .markdown-section .token.doctype      { color: var(--code-token-comment); }
+    .markdown-section .token.key,
+    .markdown-section .token.property,
+    .markdown-section .token.attr-name,
+    .markdown-section .token.tag          { color: var(--code-token-key); }
+    .markdown-section .token.keyword,
+    .markdown-section .token.atrule,
+    .markdown-section .token.important,
+    .markdown-section .token.selector     { color: var(--code-token-keyword); }
+    .markdown-section .token.string,
+    .markdown-section .token.char,
+    .markdown-section .token.attr-value   { color: var(--code-token-string); }
+    .markdown-section .token.number,
+    .markdown-section .token.boolean,
+    .markdown-section .token.constant     { color: var(--code-token-number); }
+    .markdown-section .token.function,
+    .markdown-section .token.class-name,
+    .markdown-section .token.builtin,
+    .markdown-section .token.inserted     { color: var(--code-token-function); }
+    .markdown-section .token.deleted      { color: var(--code-token-deleted); }
+    .markdown-section .token.variable,
+    .markdown-section .token.interpolation,
+    .markdown-section .token.regex        { color: var(--code-token-variable); }
+    .markdown-section .token.punctuation,
+    .markdown-section .token.operator,
+    .markdown-section .token.scalar,
+    .markdown-section .token.entity,
+    .markdown-section .token.url          { color: var(--code-token-punctuation); }
+    /* Mermaid's dark theme sets labels to #ccc, which is 4.4:1 on its own
+       #585858 edge-label fill. Its rules are scoped by the SVG's id. */
+    .mermaid :is(.nodeLabel, .edgeLabel, .cluster-label) { color: var(--base-color) !important; }
+    /* A hand-drawn node is two paths: the hatch fill, then the outline. */
+    .mermaid .highlight .label-container > path:first-child { stroke: var(--diagram-highlight-fill); }
+    .mermaid .highlight .label-container > path:last-child  { stroke: var(--diagram-highlight-stroke); }
+    /* Long lines soft-wrap at whitespace (word boundaries) only — never
+       mid-token — so a command like `... add <URL>` breaks after `add` and the
+       URL stays intact on the next line rather than splitting mid-character.
+       Put `white-space: pre-wrap` on BOTH the `pre` and the inner `code`:
+       theme-simple-dark sets `nowrap` on inline `code` (which also matches
+       `pre > code`), so the inner rule is needed. Leave overflow-wrap at its
+       default `normal` — `anywhere`/`break-word` would break the URL
+       mid-character. Soft-wrap is copy-safe: textContent carries no inserted
+       breaks, so docsify-copy-code still yields the verbatim line. */
+    .markdown-section pre,
+    .markdown-section pre > code {
+      white-space: pre-wrap !important;
+    }
+    /* Opt-in atomic run: wrap an argument (a URL, a url-mapping) in
+       <span class="nowrap"> so the line breaks at the space *before* it and
+       the run stays whole, rather than splitting mid-token. See the "forcing a
+       break at a chosen point" note in references/docsify-template.md. The span doesn't change textContent, so
+       the copy button still yields the verbatim line. */
+    .markdown-section pre code .nowrap {
+      white-space: nowrap;
+    }
+    /* Inline code wraps like text: theme-simple-dark's `nowrap` runs a long
+       one out of its table cell or callout. It breaks at spaces, and
+       mid-token (the theme's overflow-wrap) when one token is wider than the
+       line. Same selector as the theme's; this sheet loads after it. */
+    .markdown-section code:not([class*=lang-]):not([class*=language-]) {
+      white-space: normal;
+    }
+    /* Hanging indent for the wrapped continuation line of a forced-break
+       command: the first line sits at the gutter, the wrapped argument is
+       inset a couple of chars so it reads as a continuation. Scoped to
+       `:has(.nowrap)` so it never shifts the lines of a normal multi-line
+       code block (where every line after the first would otherwise indent). */
+    .markdown-section pre:has(.nowrap) > code {
+      display: block;
+      padding-left: 2ch;
+      text-indent: -2ch;
+    }
+    /* ── Copy button ───────────────────────────────────────
+       docsify-copy-code ships a hard-cornered label block pinned to the
+       panel corner that, on success, slides a "Copied" word out to its left.
+       Restyle it to a compact clipboard-icon button that flips to a green
+       check on copy, then reverts. The plugin toggles `.success`/`.error` on
+       the button and reveals it on `pre:hover` (and keyboard `:focus`); all
+       visuals key off those states.
+       Scoped under `.markdown-section` to outrank the plugin's own single-
+       class rules regardless of stylesheet insertion order. */
+    .markdown-section .docsify-copy-code-button {
+      top: 8px;
+      right: 8px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      background: var(--copy-btn-bg);
+      opacity: 0;
+      transition: opacity 0.2s ease, background 0.2s ease;
+    }
+    .markdown-section pre:hover .docsify-copy-code-button,
+    .markdown-section .docsify-copy-code-button:focus {
+      opacity: 1;
+    }
+    /* Hide docsify-themeable's language label (pre[data-lang]::after). It
+       shares the top-right corner with the copy button and adds little, so
+       the corner belongs to the button alone. */
+    .markdown-section pre[data-lang]::after {
+      display: none;
+    }
+    .markdown-section .docsify-copy-code-button:hover {
+      background: var(--copy-btn-bg-hover);
+    }
+    /* Hide the plugin's text spans (label + slide-out "Copied"/"Error"). */
+    .markdown-section .docsify-copy-code-button span { display: none; }
+    /* Icon painted on the button via a mask so state changes recolor it. */
+    .markdown-section .docsify-copy-code-button::after {
+      content: "";
+      width: 15px;
+      height: 15px;
+      background-color: var(--copy-btn-fg);
+      -webkit-mask: var(--icon-clipboard) center / contain no-repeat;
+              mask: var(--icon-clipboard) center / contain no-repeat;
+      transition: background-color 0.2s ease;
+    }
+    /* Success: button + icon go green, check replaces clipboard, stays lit. */
+    .markdown-section .docsify-copy-code-button.success {
+      opacity: 1;
+      background: var(--copy-btn-success-bg);
+    }
+    .markdown-section .docsify-copy-code-button.success::after {
+      background-color: var(--copy-btn-success-fg);
+      -webkit-mask-image: var(--icon-check);
+              mask-image: var(--icon-check);
+    }
+    .sidebar {
+      color: var(--base-color);
+    }
+    .search input,
+    .search input[type="search"] {
+      background-color: var(--search-input-background-color) !important;
+      color: var(--search-input-color) !important;
+      border-color: var(--search-input-border-color) !important;
+      -webkit-text-fill-color: var(--search-input-color) !important;
+    }
+    .search input::placeholder,
+    .search input[type="search"]::placeholder {
+      color: var(--search-placeholder-color) !important;
+      -webkit-text-fill-color: var(--search-placeholder-color) !important;
+      opacity: 1;
+    }
+    .search .input-wrap svg,
+    .search .clear-button svg,
+    .search .input-wrap::after {
+      fill: var(--search-icon-color) !important;
+      stroke: var(--search-icon-color) !important;
+      color: var(--search-icon-color) !important;
+    }
+    /* The search is a field inset on the 12px gutter the toggle uses; one
+       hairline under it closes the header. */
+    .sidebar .search {
+      margin: 0 12px 12px !important;
+      border: none !important;
+    }
+    .sidebar .search .input-wrap {
+      position: relative;
+      border: none !important;
+      background: transparent !important;
+    }
+    .sidebar .search input {
+      height: 36px;
+      padding-block: 0 !important;
+      border: 1px solid var(--search-input-border-color) !important;
+      border-radius: 8px;
+      transition: border-color 0.15s ease;
+    }
+    .sidebar .search input:focus {
+      outline: none;
+      border-color: var(--sidebar-nav-link-color--active) !important;
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--sidebar-nav-link-color--active) 30%, transparent);
+    }
+    .sidebar .search .input-wrap::before {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      transform: translateY(-50%);
+      background-color: var(--search-icon-color);
+      -webkit-mask: var(--icon-search) center / contain no-repeat;
+              mask: var(--icon-search) center / contain no-repeat;
+      pointer-events: none;
+    }
+    .sidebar .search input {
+      padding-left: 34px !important;
+      padding-right: 34px !important;
+    }
+    /* The plugin's clear button is a block whose 24px svg sits at the top of
+       the taller input. Center it in the input instead. */
+    .sidebar .search .clear-button {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 9px;
+      width: 18px;
+      padding: 0 !important;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar .search .clear-button.show {
+      display: flex;
+    }
+    .sidebar .search .clear-button svg {
+      width: 18px;
+      height: 18px;
+      transform: none;
+    }
+    .search .results-panel {
+      background-color: var(--search-result-background);
+      color: var(--search-result-color);
+    }
+    .search .matching-post {
+      border-bottom-color: var(--search-result-border-color);
+    }
+    .search .search-keyword {
+      color: var(--search-result-keyword-color);
+      background-color: var(--search-result-keyword-background);
+    }
+
+    /* ── Annotation callout colors ─────────────────────────── */
+    .markdown-section .tip {
+      border-left-color: var(--notice-tip-border-color);
+    }
+    .markdown-section .warn,
+    .markdown-section .warning {
+      border-left-color: var(--notice-warning-border-color);
+    }
+    .markdown-section .alert.callout.note      { --alert-color: var(--alert-note-color); }
+    .markdown-section .alert.callout.tip       { --alert-color: var(--alert-tip-color); }
+    .markdown-section .alert.callout.important { --alert-color: var(--alert-important-color); }
+    .markdown-section .alert.callout.warning   { --alert-color: var(--alert-warning-color); }
+    .markdown-section .alert.callout.attention { --alert-color: var(--alert-caution-color); }
+    /* :is() makes these more specific than the plugin's own
+       .alert.callout.<type> rules. */
+    .markdown-section .alert.callout:is(.note, .tip, .important, .warning, .attention) {
+      border-left-color: var(--alert-color) !important;
+    }
+    .markdown-section .alert.callout:is(.note, .tip, .important, .warning, .attention) .title {
+      color: var(--alert-color);
+    }
+
+    /* ── Sidebar resize handle ─────────────────────────────
+         4px strip at the right edge, transparent until hover.
+         Narrow enough that the nav's scrollbar (≥7px on every
+         major OS) still has clickable area to its left. Do NOT
+         straddle the boundary with `right: -3px`; that approach
+         requires `overflow: visible` on .sidebar and introduces
+         layout-shift bugs when the viewport resizes. */
+    .sidebar-resize-handle {
+      position: absolute;
+      top: 0; right: 0;
+      width: 4px; height: 100%;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 20;
+    }
+    .sidebar-resize-handle:hover,
+    .sidebar-resize-handle.dragging {
+      background: var(--resize-handle-color, var(--sidebar-nav-link-color--active));
+    }
+
+    /* ── Theme toggle pill (injected into sidebar header) ──
+         `margin-left: auto` puts it at the right of the flex row
+         regardless of how wide the app-name is; `flex: none` keeps
+         it from collapsing. */
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      flex: none;
+      position: relative;
+      background: var(--toggle-bg);
+      border: none;
+      border-radius: 20px;
+      padding: 3px;
+      margin-left: auto;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s ease;
+    }
+    .theme-toggle:hover {
+      background: var(--toggle-bg-hover);
+    }
+    .theme-toggle-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      z-index: 1;
+      position: relative;
+      color: var(--toggle-inactive-color);
+      transition: color 0.35s ease;
+    }
+    .theme-toggle-option svg {
+      width: 14px;
+      height: 14px;
+    }
+    .theme-toggle-indicator {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--toggle-indicator);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      left: 3px;
+      top: 3px;
+    }
+    [data-theme="light"] .theme-toggle-indicator {
+      transform: translateX(0);
+    }
+    [data-theme="light"] .theme-toggle-sun {
+      color: var(--toggle-active-color);
+    }
+    [data-theme="dark"] .theme-toggle-indicator {
+      transform: translateX(26px);
+    }
+    [data-theme="dark"] .theme-toggle-moon {
+      color: var(--toggle-active-color);
+    }
+
+    /* ── Sidebar layout ──────────────────────────────────────
+         Canonical working pattern. Do NOT deviate from these rules
+         without reading the commentary below — every one of them
+         exists to fix a specific bug that has bitten us before.
+           - `overflow: hidden` on the sidebar (NOT `visible`) with a
+             `box-shadow: inset -1px 0 0` for the right border. A
+             real `border-right` consumes layout width and offsets
+             the scrollbar inward; a pseudo-element accent combined
+             with `overflow: visible` makes the resize handle hard
+             to hit. Box-shadow is the only approach that gets both.
+           - `--sidebar-padding` is 0, so every gutter is set where
+             it applies: the header row, the search input's padding
+             (with `--search-input-margin: 0`, since the theme's
+             `0 -25px` assumes its own padding), and the nav links.
+           - `padding-right: 0` + `margin-right: 0` on both sidebar
+             and nav so the scrollbar sits flush at the edge; the
+             resize handle at `right: 0; width: 4px` overlays only
+             the outer 4px, leaving most of the scrollbar track
+             clickable.
+           - Header row is `display: flex`; the app-name flexes
+             (`flex: 1; min-width: 0`) and the toggle pill lands on
+             the right via `margin-left: auto` on the pill itself
+             (not from the parent's layout). This lets the pill
+             survive if the app-name is wrapped in extra nodes. */
+    .sidebar {
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      box-shadow: inset -1px 0 0 var(--sidebar-border-color, var(--blockquote-border-color));
+    }
+    .sidebar .app-name { display: none !important; }
+
+    .sidebar-header {
+      flex: none;
+      background: var(--sidebar-background);
+      border-bottom: 1px solid var(--search-border-color);
+    }
+    /* The icon's left edge shares the 16px gutter with the nav links; the
+       toggle's right edge shares the search field's. The name wraps at its
+       spaces beside the icon; a word too wide for the column ellipsizes
+       rather than splitting mid-word at the narrow end of the resize range. */
+    .sidebar-header-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 12px 14px 16px;
+    }
+    .sidebar-header-row .app-name-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--sidebar-name-color);
+      font-weight: 700;
+      font-size: 1.05rem;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      flex: 1;
+      min-width: 0;
+    }
+    .sidebar-header-row .app-name-icon {
+      flex: none;
+      width: 32px;
+      height: 32px;
+    }
+    .sidebar-header-row .app-name-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar > nav,
+    .sidebar > .sidebar-nav {
+      flex: 1 !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      min-height: 0 !important;
+      padding-right: 0 !important;
+      margin-right: 0 !important;
+    }
+    .sidebar { padding-right: 0 !important; }
+    .sidebar-nav { margin: 0 !important; padding: 0 !important; }
+    .sidebar-nav > :first-child { margin-top: 0 !important; }
+    /* Long monospace nav labels wrap inside the sidebar rather than
+       forcing a horizontal scrollbar. */
+    .sidebar-nav a code,
+    .sidebar-nav a {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    /* ── Sidebar nav polish ────────────────────────────────── */
+    .sidebar-nav li a {
+      transition: color 0.2s ease;
+    }
+    /* docsify-themeable paints an expand-chevron on every nav link via
+       --sidebar-nav-pagelink-background, which makes leaf items look
+       expandable. docsify-sidebar-collapse tags leaves with `.file`; suppress
+       the chevron there (background only — do NOT zero padding-left here, it
+       jams the text against the edge and desyncs file vs external links). */
+    .sidebar-nav li.file > a,
+    .sidebar-nav li.file.active > a {
+      background: none !important;
+    }
+    /* Uniform left gutter. A flat nav has no real nesting, so flatten the
+       theme's per-level indent and give every link — file, folder, and
+       external alike — and every `**Section**` label the same inset. */
+    .sidebar-nav ul { padding-left: 0 !important; }
+    .sidebar-nav li { margin-left: 0 !important; }
+    .sidebar-nav li a,
+    .sidebar-nav li > strong {
+      padding-left: 16px !important;
+      padding-right: 12px !important;
+    }
+
+    /* ── Misc layout ───────────────────────────────────────── */
+    @media screen and (min-width: 768px) {
+      .sidebar-toggle { display: none; }
+    }
+    /* Below 768px the menu button floats over the top-left of the content;
+       start the page below it so it never covers the H1. `.content` raises
+       specificity over the runtime-injected `.markdown-section { padding: 16px }`. */
+    @media screen and (max-width: 767px) {
+      .content .markdown-section { padding-top: 3.5rem; }
+    }
+{{GITLAB_CORNER_CSS}}  </style>
+  <script>
+    // Theme: honor saved preference, then system preference, then dark
+    (function() {
+      var key = 'docsify-theme:' + location.pathname.replace(/\/+$/, '');
+      window.__themeKey = key;
+      var saved = localStorage.getItem(key);
+      var theme = saved
+        || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+    function getMermaidTheme() {
+      return document.documentElement.getAttribute('data-theme') === 'light' ? 'default' : 'dark';
+    }
+    function toggleTheme() {
+      var html = document.documentElement;
+      var current = html.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem(window.__themeKey, next);
+      if (typeof mermaid !== 'undefined') {
+        mermaid.initialize({ startOnLoad: false, theme: getMermaidTheme(), look: 'handDrawn' });
+        mermaid.run({ querySelector: '.mermaid' });
+      }
+    }
+  </script>
+</head>
+<body class="notranslate" translate="no">
+  <div id="app"></div>
+
+  <script>
+    window.$docsify = {
+      name: '{{PROJECT_NAME}}',
+      // Hash-only nameLink preserves the pathname under Pages subpath hosting;
+      // path-anchored values ('/', '/<repo>/') break on at least one of local
+      // preview, Pages, or a site served under a shared loader.
+      nameLink: '#/',
+      repo: '{{REPO_URL}}',
+      // Resolve relative links against the current page, so one relative link
+      // works on the site, in a repo checkout, and on the forge's own render.
+      // Docsify's default (false) resolves them from the site root instead, so
+      // a sibling `[bedrock](bedrock)` on /projects/ silently routes to
+      // #/bedrock. Absolute site-root targets keep working either way.
+      relativePath: true,
+      loadSidebar: true,
+      // subMaxLevel 0 disables auto-extracting page headings as phantom
+      // sidebar children. Bump it only if the sidebar is meant to carry
+      // a page's heading tree (rare — usually the hand-curated sidebar
+      // is the whole nav).
+      subMaxLevel: 0,
+      sidebarDisplayLevel: 1,
+      auto2top: true,
+      // [!CAUTION] is the plugin's alias for its ATTENTION type, whose default
+      // label is "Attention"; GitHub renders the same alert as "Caution".
+      'flexible-alerts': {
+        attention: { label: 'Caution' }
+      },
+      alias: {
+        '/.*/_sidebar.md': '/_sidebar.md'
+      },
+      search: {
+        placeholder: 'Search',
+        noData: 'No results',
+        // The plugin caches its index in localStorage under this key for a day;
+        // bump the version when what gets indexed changes. localStorage is per
+        // origin, which a Pages host shares across a group's sites and each
+        // site's previews, so the path keeps their indexes apart.
+        namespace: location.pathname + 'rendered-text-v1',
+        depth: 4
+      },
+      markdown: {
+        renderer: {
+          code: function(code, lang) {
+            if (lang === 'mermaid') {
+              return '<div class="mermaid">' + code + '</div>';
+            }
+            return this.origin.code.apply(this, arguments);
+          }
+        }
+      },
+      plugins: [
+        function(hook) {
+          hook.ready(function() {
+            var sidebar = document.querySelector('.sidebar');
+            if (!sidebar) return;
+
+            // Inject theme toggle pill
+            var pill = document.createElement('div');
+            pill.className = 'theme-toggle';
+            pill.setAttribute('aria-label', 'Toggle theme');
+            pill.onclick = toggleTheme;
+            pill.innerHTML =
+              '<span class="theme-toggle-option theme-toggle-sun">' +
+                '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round">' +
+                  '<circle cx="12" cy="12" r="5"/>' +
+                  '<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>' +
+                '</svg>' +
+              '</span>' +
+              '<span class="theme-toggle-option theme-toggle-moon">' +
+                '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round">' +
+                  '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>' +
+                '</svg>' +
+              '</span>' +
+              '<span class="theme-toggle-indicator"></span>';
+
+            // Build header: [app-name] [pill] on one row, search below.
+            // `margin-left: auto` on the pill (set in CSS) handles the
+            // right-alignment.
+            var header = document.createElement('div');
+            header.className = 'sidebar-header';
+            var row = document.createElement('div');
+            row.className = 'sidebar-header-row';
+            var appName = sidebar.querySelector('.app-name-link');
+            if (appName) {
+              // The site's favicon doubles as the sidebar logo, so it has one source.
+              var nameText = document.createElement('span');
+              nameText.className = 'app-name-text';
+              nameText.textContent = appName.textContent;
+              var icon = document.createElement('img');
+              icon.className = 'app-name-icon';
+              icon.src = document.querySelector('link[rel="icon"]').getAttribute('href');
+              icon.alt = '';
+              appName.replaceChildren(icon, nameText);
+              row.appendChild(appName);
+            }
+            row.appendChild(pill);
+            header.appendChild(row);
+            var search = sidebar.querySelector('.search');
+            if (search) {
+              // The plugin draws its clear icon off-center in a 26x24 box.
+              var clearIcon = search.querySelector('.clear-button svg');
+              if (clearIcon) clearIcon.setAttribute('viewBox', '0 0 24 24');
+              header.appendChild(search);
+            }
+            sidebar.insertBefore(header, sidebar.firstChild);
+
+            // Resize handle. Mouse events (not pointer events) — mouse is
+            // simpler and the touch audience for a docs sidebar is ~0.
+            // Disable the sidebar's CSS transition during drag so the width
+            // follows the cursor 1:1 (otherwise it visibly lags).
+            // Double-click to auto-fit the sidebar to its widest nav label.
+            var handle = document.createElement('div');
+            handle.className = 'sidebar-resize-handle';
+            handle.setAttribute('aria-label', 'Resize sidebar');
+            sidebar.appendChild(handle);
+
+            var WIDTH_KEY = 'docsify-sidebar-width';
+            var savedWidth = localStorage.getItem(WIDTH_KEY);
+            if (savedWidth) document.documentElement.style.setProperty('--sidebar-width', savedWidth);
+
+            handle.addEventListener('dblclick', function() {
+              var nav = sidebar.querySelector('.sidebar-nav');
+              if (!nav) return;
+              sidebar.style.width = 'min-content';
+              nav.style.whiteSpace = 'nowrap';
+              var fitWidth = sidebar.offsetWidth + 20;
+              sidebar.style.width = '';
+              nav.style.whiteSpace = '';
+              var w = Math.max(200, Math.min(fitWidth, window.innerWidth * 0.5));
+              document.documentElement.style.setProperty('--sidebar-width', w + 'px');
+              localStorage.setItem(WIDTH_KEY, w + 'px');
+            });
+
+            handle.addEventListener('mousedown', function(e) {
+              e.preventDefault();
+              handle.classList.add('dragging');
+              sidebar.style.transition = 'none';
+              document.body.style.cursor = 'col-resize';
+              document.body.style.userSelect = 'none';
+              function onMove(ev) {
+                var w = Math.max(200, Math.min(ev.clientX, window.innerWidth * 0.5));
+                document.documentElement.style.setProperty('--sidebar-width', w + 'px');
+              }
+              function onUp() {
+                handle.classList.remove('dragging');
+                sidebar.style.transition = '';
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                localStorage.setItem(WIDTH_KEY, document.documentElement.style.getPropertyValue('--sidebar-width'));
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+              }
+              document.addEventListener('mousemove', onMove);
+              document.addEventListener('mouseup', onUp);
+            });
+          });
+          hook.doneEach(function() {
+            if (typeof mermaid !== 'undefined') {
+              mermaid.initialize({ startOnLoad: false, theme: getMermaidTheme(), look: 'handDrawn' });
+              mermaid.run({ querySelector: '.mermaid' });
+            }
+          });
+        },
+        // The search plugin indexes each block's raw markdown (token.text), so
+        // its results show link syntax, backticks, and tags, and a linked or HTML
+        // heading slugs to an id no heading has. Hand search a lexer whose
+        // tokens carry the text the page renders: the snippet is cut from plain
+        // text, and a heading's plain text slugs to the id docsify renders.
+        // Only search reads window.marked.lexer; pages render through the marked
+        // docsify captured at startup, so swapping window.marked leaves them be.
+        function searchPlainText(hook) {
+          hook.init(function () {
+            var marked = window.marked;
+            var lex = marked.lexer;
+            function text(html) {
+              return new DOMParser().parseFromString(html, 'text/html').body.textContent.trim();
+            }
+            // docsify slugs a heading's rendered HTML, trimming it before it
+            // strips the tags, so <img> Name gets the id "-name" where the plain
+            // text would slug to "name". These are its slugify rules without the
+            // per-page counter, which the index's own slugify still applies.
+            var SLUG_PUNCT = /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g;
+            function pageId(html) {
+              return html.trim().replace(/[A-Z]+/g, function (s) { return s.toLowerCase(); })
+                .replace(/<[^>]+>/g, '').replace(SLUG_PUNCT, '')
+                .replace(/\s/g, '-').replace(/-+/g, '-').replace(/^(\d)/, '_$1');
+            }
+            // The plugin slugs a heading as slugify(escapeHtml(text)) with this escape.
+            function escapeHtml(s) {
+              return s.replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+              });
+            }
+            function heading(md) {
+              // Inline only: the heading renderer advances docsify's slug
+              // counter, which would shift every indexed id to "<id>-1".
+              var html = marked.parseInline(md);
+              var plain = text(html);
+              var id = pageId(html);
+              // An author's own :id= stays in the text, where docsify and the plugin both read it.
+              if (/(^|\s):id=/.test(plain) || id === pageId(escapeHtml(plain))) return plain;
+              // The plugin reads an option's value only up to the first character outside [\w%-].
+              if (/^[\w%-]+$/.test(id)) return plain + ' :id=' + id;
+              console.error('searchPlainText: search cannot link to the heading id "' + id + '"');
+              return plain;
+            }
+            // docsify's renderer, except that a heading nested in a blockquote or list
+            // renders as bare text: docsify's heading renderer would advance its slug
+            // counter and add the heading to the page's table of contents.
+            function block(md) {
+              var renderer = Object.create(marked.defaults.renderer);
+              renderer.heading = function (text) { return '<p>' + text + '</p>\n'; };
+              return marked(md, { renderer: renderer });
+            }
+            function lexer(src, options) {
+              var tokens = lex(src, options);
+              tokens.forEach(function (token) {
+                if (token.type === 'heading') token.text = heading(token.text);
+                else if (token.type === 'code') token.text = token.lang === 'mermaid' ? '' : token.text;
+                else if (token.type !== 'space') token.text = text(block(token.raw));
+              });
+              return tokens;
+            }
+            window.marked = Object.assign(function () { return marked.apply(this, arguments); }, marked, { lexer: lexer });
+          });
+        },
+        // docsify scrolls to a ?id= target only for a click it saw land on an
+        // HTML link: it tests tagName === 'A', and a link inside an SVG reports
+        // 'a'. A chart whose rows link to entries on the same page (an SVG
+        // timeline, say) would change the URL and stay put without this.
+        function svgLinks(hook) {
+          hook.mounted(function () {
+            document.addEventListener('click', function (e) {
+              var link = e.target.closest && e.target.closest('.markdown-section svg a');
+              if (!link || link.getAttribute('target')) return;
+              var m = /^#([^?]*)\?(?:[^#]*&)?id=([^&]+)/.exec(link.getAttribute('href') || '');
+              if (!m || location.hash.split('?')[0] !== '#' + m[1]) return;
+              var target = document.getElementById(decodeURIComponent(m[2]));
+              if (!target) return;
+              e.preventDefault();
+              location.hash = link.getAttribute('href');
+              var top = window.scrollY + target.getBoundingClientRect().top - (window.$docsify.topMargin || 0);
+              window.scrollTo({ top: top, behavior: 'smooth' });
+            });
+          });
+        },
+        // docsify measures a ?id= target once, before the mermaid diagrams and
+        // images above it reach their rendered size, so a deep link lands short
+        // by their combined height. Once they have, and docsify's own scroll
+        // animation has stopped, scroll to the target again.
+        function deepLinkSettle(hook) {
+          var MAX_FRAMES = 600;
+          // docsify's ?id= tween runs this long. scrollY can't say when it's
+          // done: it eases out, holding still for frames before its last
+          // write, and one aimed past the top or bottom writes a clamped
+          // value that never moves.
+          var DOCSIFY_SCROLL_MS = 500;
+          hook.doneEach(function () {
+            var match = /[?&]id=([^&]+)/.exec(location.hash);
+            if (!match) return;
+            var id = decodeURIComponent(match[1]);
+            var frames = 0, stillFrames = 0, lastY = -1, started = performance.now();
+            (function settle() {
+              if (++frames > MAX_FRAMES) return;
+              var target = document.getElementById(id);
+              var above = function (el) {
+                return target.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING;
+              };
+              var rendering = target && ([].some.call(document.querySelectorAll('.markdown-section .mermaid'), function (el) {
+                return above(el) && !el.querySelector('svg');
+              }) || [].some.call(document.querySelectorAll('.markdown-section img'), function (img) {
+                if (!above(img) || img.complete) return false;
+                // A lazy image far above the viewport (docsify's emoji) never
+                // loads on its own, so it would hold the correction until the cap.
+                img.loading = 'eager';
+                return true;
+              }));
+              stillFrames = window.scrollY === lastY ? stillFrames + 1 : 0;
+              lastY = window.scrollY;
+              var tweening = performance.now() - started < DOCSIFY_SCROLL_MS;
+              if (!target || rendering || tweening || stillFrames < 3) return requestAnimationFrame(settle);
+              var offset = target.getBoundingClientRect().top - (window.$docsify.topMargin || 0);
+              if (Math.abs(offset) > 2) window.scrollTo(0, window.scrollY + offset);
+            })();
+          });
+        },
+        // docsify scrolls to a ?id= heading only when the click's target, or
+        // its parent, has tagName 'A'. A mermaid `click` link is an SVG <a>
+        // (tagName 'a') around a label <p>, so docsify takes the hash change
+        // for back or forward and leaves the page where it is. Replay the
+        // click on an HTML link so docsify sees a link navigation.
+        function mermaidLinks(hook) {
+          hook.mounted(function () {
+            document.addEventListener('click', function (e) {
+              var svgLink = e.target.closest('.mermaid a');
+              // A modified click or a link with a target keeps the browser's own handling.
+              if (!svgLink || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              var target = svgLink.getAttribute('target');
+              if (target && target !== '_self') return;
+              e.preventDefault();
+              var link = document.createElement('a');
+              link.href = svgLink.getAttribute('xlink:href') || svgLink.getAttribute('href');
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+            });
+          });
+        }
+      ]
+    };
+  </script>
+
+  <!-- Docsify core -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+  <!-- Search (renders in sidebar by default) -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <!-- GitHub-style alerts -->
+  <script src="https://unpkg.com/docsify-plugin-flexible-alerts"></script>
+  <!-- Copy button on every fenced code block -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
+  <!-- Prism languages — populated by bootstrap.py from detected languages -->
+{{PRISM_PLUGINS}}
+{{MERMAID_SCRIPTS}}
+  <!-- Sidebar Collapse (required for sidebarDisplayLevel to work) -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-sidebar-collapse@1/dist/docsify-sidebar-collapse.min.js"></script>
+</body>
+</html>

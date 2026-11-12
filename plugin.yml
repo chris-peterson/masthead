@@ -42,8 +42,10 @@ events:
 suite:
   group: charts
   gloss: "masthead: put your docs where readers can see them."
-  pitch: "Your repo has docs but no front door? Raise a hub readers can find, and keep it current as the code moves."
-  what: "Stands up a documentation hub for a repo (home page, navigation, and a deploy that publishes on every push) and keeps it current as the code changes. The docs engine (e.g. docsify) is an adapter, so the hub isn't tied to one tool. Pages are written for the person who comes next: how the thing works, and what to watch out for."
+  pitch: "Your repo has docs but no front door? Raise a hub readers can find, with a deploy that publishes it on every push."
+  what: "Stands up a documentation hub for a repo: home page, navigation, search, and a deploy that publishes it on every push. It sorts the docs the repo already has by audience, so the hub holds what end users need and the rest is pointed to where maintainers and agents look. The docs engine is an adapter, so the hub isn't tied to one tool; docsify is the engine today. Pages are written for the person who comes next: how the thing works, and what to watch out for."
+  cmds:
+    - ["/masthead:bootstrap", "Stand up a docs hub for a repo, with a deploy"]
   # >>> shipyard:describe — generated from source by `shipyard gen-describe`; do not edit >>>
   describe: {}
   # <<< shipyard:describe <<<

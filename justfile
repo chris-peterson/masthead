@@ -13,6 +13,11 @@ default:
 try:
     claude --plugin-dir .
 
+# Run the script tests (bootstrap scaffold, announcements)
+[group('check your work')]
+test:
+    python3 -m unittest discover -s tests
+
 # Regenerate the artifacts and list what the projection job would commit
 [group('check your work')]
 check-generated:

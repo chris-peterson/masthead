@@ -10,6 +10,11 @@ out for.
 
 ```text
 plugin.yml           the plugin's descriptor; plugin.json is generated from it
+skills/bootstrap/    /masthead:bootstrap: SKILL.md is the engine-neutral flow;
+                     scripts/<engine>/, assets/<engine>/, and
+                     references/<engine>*.md are one engine's adapter
+scripts/announce.sh  prints masthead's interop announcements (content.routed)
+tests/               unit tests for the scripts (`just test`)
 docs/                masthead's own docs site; hand-written pages are tracked,
                      the rest is rendered by `just docs`
 .github/workflows/   shipyard's project, docs deploy, and release workflows

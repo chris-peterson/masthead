@@ -1,0 +1,193 @@
+"""Tests for the docsify scaffold (skills/bootstrap/scripts/docsify/bootstrap.py)
+and the announce script, run against throwaway git repos.
+
+    python3 -m unittest discover -s tests
+"""
+
+import json
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+BOOTSTRAP = ROOT / "skills" / "bootstrap" / "scripts" / "docsify" / "bootstrap.py"
+ANNOUNCE = ROOT / "scripts" / "announce.sh"
+
+
+def sh(cwd, *args):
+    subprocess.run(args, cwd=cwd, check=True, capture_output=True, text=True)
+
+
+class Repo:
+    """A git repo in a temp dir with an origin remote and one commit."""
+
+    def __init__(self, origin="git@github.com:example-org/widget.git"):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.path = Path(self.tmp.name) / "widget"
+        self.path.mkdir()
+        sh(self.path, "git", "init", "-q", "-b", "main")
+        sh(self.path, "git", "config", "user.email", "test@example.com")
+        sh(self.path, "git", "config", "user.name", "test")
+        if origin:
+            sh(self.path, "git", "remote", "add", "origin", origin)
+
+    def write(self, rel, text=""):
+        p = self.path / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text, encoding="utf-8")
+        sh(self.path, "git", "add", rel)
+
+    def run(self, *flags):
+        return subprocess.run(
+            [sys.executable, str(BOOTSTRAP), str(self.path), *flags],
+            capture_output=True, text=True,
+        )
+
+    def read(self, rel):
+        return (self.path / rel).read_text(encoding="utf-8")
+
+    def close(self):
+        self.tmp.cleanup()
+
+
+class BootstrapTest(unittest.TestCase):
+    def setUp(self):
+        self.repo = Repo()
+        self.addCleanup(self.repo.close)
+
+    def test_github_scaffold(self):
+        self.repo.write("tool.py", "print('hi')\n")
+        r = self.repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        index = self.repo.read("docs/index.html")
+        self.assertNotIn("{{", index)
+        self.assertIn("name: 'widget'", index)
+        self.assertIn("repo: 'https://github.com/example-org/widget'", index)
+        self.assertIn("prism-python.min.js", index)
+        self.assertNotIn("mermaid.min.js", index)
+        self.assertNotIn("gitlab-logo", index)
+        self.assertEqual(self.repo.read("docs/_sidebar.md"), "- [Home](/README.md)\n")
+        self.assertIn("# widget", self.repo.read("docs/README.md"))
+        self.assertIn("npx docsify-cli serve docs --open", self.repo.read("justfile"))
+        wf = self.repo.read(".github/workflows/deploy-docs.yml")
+        self.assertIn("branches: [main]", wf)
+        self.assertIn("https://example-org.github.io/widget/", r.stdout)
+        self.assertIn("github.com/example-org/widget/settings/pages", r.stdout)
+
+    def test_name_override_keeps_repo_name_in_urls(self):
+        r = self.repo.run("--name", "Widget Docs")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("name: 'Widget Docs'", self.repo.read("docs/index.html"))
+        self.assertIn("github.com/example-org/widget/settings/pages", r.stdout)
+
+    def test_gitlab_scaffold(self):
+        repo = Repo("https://gitlab.example.com/group/widget.git")
+        self.addCleanup(repo.close)
+        r = repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("gitlab-logo", repo.read("docs/index.html"))
+        self.assertIn("pages: true", repo.read(".gitlab-ci.yml"))
+
+    def test_unknown_host_fails_loud(self):
+        repo = Repo("https://git.example.com/group/widget.git")
+        self.addCleanup(repo.close)
+        r = repo.run()
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("--host", r.stderr)
+        self.assertFalse((repo.path / "docs").exists())
+        r = repo.run("--host", "gitlab", "--repo-url", "https://git.example.com/group/widget")
+        self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_not_a_repo(self):
+        with tempfile.TemporaryDirectory() as d:
+            r = subprocess.run([sys.executable, str(BOOTSTRAP), d], capture_output=True, text=True)
+            self.assertNotEqual(r.returncode, 0)
+            self.assertIn("not a git repository", r.stderr)
+
+    def test_mermaid_and_spec(self):
+        self.repo.write("notes.md", "```mermaid\nflowchart LR\n  a --> b\n```\n")
+        self.repo.write("SPEC.md", "# Spec\n")
+        r = self.repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("mermaid.min.js", self.repo.read("docs/index.html"))
+        self.assertIn("- [Requirements](/SPEC.md)", self.repo.read("docs/_sidebar.md"))
+        self.assertIn("cp SPEC.md docs/SPEC.md", self.repo.read("justfile"))
+        self.assertIn("cp SPEC.md docs/SPEC.md", self.repo.read(".github/workflows/deploy-docs.yml"))
+
+    def test_existing_index_needs_force(self):
+        self.repo.write("docs/index.html", "<html>mine</html>\n")
+        r = self.repo.run()
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("--force", r.stderr)
+        self.assertEqual(self.repo.read("docs/index.html"), "<html>mine</html>\n")
+        r = self.repo.run("--force")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("window.$docsify", self.repo.read("docs/index.html"))
+
+    def test_other_engine_refused(self):
+        for rel, needle in (("mkdocs.yml", "MkDocs"), ("plugin.yml", "shipyard")):
+            with self.subTest(rel=rel):
+                repo = Repo()
+                self.addCleanup(repo.close)
+                repo.write(rel, "name: x\ndocs:\n  mermaid: false\n")
+                r = repo.run()
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn(needle, r.stderr)
+                self.assertFalse((repo.path / "docs").exists())
+
+    def test_plugin_yml_without_docs_block_is_fine(self):
+        self.repo.write("plugin.yml", "name: x\n")
+        r = self.repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_existing_ci_and_justfile_are_left_alone(self):
+        self.repo.write(".github/workflows/ci.yml", "name: CI\n")
+        self.repo.write("Justfile", "build:\n    echo build\n")
+        r = self.repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertFalse((self.repo.path / ".github/workflows/deploy-docs.yml").exists())
+        self.assertIn("ci-integration.md", r.stdout)
+        just = self.repo.read("Justfile")
+        self.assertIn("build:", just)
+        self.assertIn("docs:", just)
+
+    def test_seeds_are_not_overwritten(self):
+        self.repo.write("docs/README.md", "# Mine\n")
+        self.repo.write("docs/_sidebar.md", "- [Mine](/README.md)\n")
+        r = self.repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.repo.read("docs/README.md"), "# Mine\n")
+        self.assertEqual(self.repo.read("docs/_sidebar.md"), "- [Mine](/README.md)\n")
+
+
+@unittest.skipUnless(shutil.which("jq"), "announce.sh needs jq")
+class AnnounceTest(unittest.TestCase):
+    def announce(self, *args):
+        return subprocess.run(["bash", str(ANNOUNCE), *args], capture_output=True, text=True)
+
+    def test_one_line_with_json_body(self):
+        r = self.announce("content.routed", "tier=maintainer", "path=docs/releasing.md",
+                          "title=Releasing", 'reason=Needs a checkout, "really"\nso it moves.')
+        self.assertEqual(r.returncode, 0)
+        lines = r.stdout.splitlines()
+        self.assertEqual(len(lines), 1)
+        key, body = lines[0].split(" ", 1)
+        self.assertEqual(key, "codes.bridgeai.masthead/content.routed")
+        self.assertEqual(json.loads(body), {
+            "tier": "maintainer", "path": "docs/releasing.md", "title": "Releasing",
+            "reason": 'Needs a checkout, "really"\nso it moves.',
+        })
+
+    def test_malformed_calls_exit_zero_and_print_nothing(self):
+        for args in (("Content.Routed",), ("content.routed", "Tier=x"), ()):
+            with self.subTest(args=args):
+                r = self.announce(*args)
+                self.assertEqual(r.returncode, 0)
+                self.assertEqual(r.stdout, "")
+
+
+if __name__ == "__main__":
+    unittest.main()
