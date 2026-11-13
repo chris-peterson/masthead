@@ -35,6 +35,7 @@ git repo, then scaffolds in place:
 | `docs/_sidebar.md` | Only if missing: a `Home` entry, plus `Requirements` for a spec-driven repo |
 | `docs/README.md` | Only if missing: a placeholder home page |
 | a `docs` recipe in the justfile | Appended, or a new justfile; left alone if a `docs` recipe exists |
+| a `docs/<spec>` line in `.gitignore` | Only for a spec-driven repo, and only when the copy isn't already ignored |
 | `.github/workflows/deploy-docs.yml` or `.gitlab-ci.yml` | Only when the repo has no CI of its own |
 
 It then prints a summary and a numbered list of follow-ups, which are the
@@ -46,6 +47,7 @@ judgment steps in SKILL.md.
 | `--name NAME` | The project name differs from the repo name |
 | `--langs l1,l2,...` | Override the detected Prism language list |
 | `--force` | Replace an existing `docs/index.html` with the current template |
+| `--previews` | GitLab only: publish each merge request to its own Pages preview. Needs Premium or Ultimate; see [CI integration](ci-integration.md#merge-request-previews) |
 
 The script fails rather than guessing. It stops when:
 
@@ -222,9 +224,10 @@ Some repos keep a `SPEC.md` at the root, a numbered requirements list that spec
 tools (such as sextant's) read from there. The script detects `SPEC.md`,
 `spec.md`, or `SPECIFICATION.md`, adds `- [Requirements](/<file>)` as the last
 sidebar entry, and adds a copy step to the justfile recipe and the CI it writes.
-The spec stays at the root; the deploy copies it into `docs/` at build time, so
-add `docs/<file>` to `.gitignore`. If you wire the deploy into existing CI by
-hand, add the copy step there too.
+The spec stays at the root and the deploy copies it into `docs/` at build time;
+the script ignores that copy in `.gitignore`, and the GitHub workflow it writes
+triggers on a change to the spec as well as to `docs/`. If you wire the deploy
+into existing CI by hand, add the copy step and the spec's path there too.
 
 ## Annotations
 

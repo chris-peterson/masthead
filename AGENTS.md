@@ -25,6 +25,15 @@ docs/                masthead's own docs site; hand-written pages are tracked,
 `just` lists the recipes. `just try` opens a session with this checkout loaded
 as a plugin; `just validate` checks it the way CI does.
 
+The tests run the scripts against throwaway git repos, so they need `git` and
+`jq` on PATH. To run one test:
+`python3 -m unittest discover -s tests -k test_github_scaffold`.
+
+`.gitignore` ignores `docs/*` and re-includes the hand-written pages one by one,
+so a new hand-written page needs its own `!docs/<page>.md` line or git won't
+see it. `docs/events.md` is rendered from `plugin.yml`'s `events:` block; edit
+the block, not the page.
+
 ## Conventions
 
 - This is a public repo: no internal hosts, private paths, or company names in

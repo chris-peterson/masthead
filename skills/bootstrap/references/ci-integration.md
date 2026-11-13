@@ -37,6 +37,9 @@ the workflow already does.
        - 'docs/**'
    ```
 
+   In a spec-driven repo, list the spec too (`- 'SPEC.md'`): it's copied into
+   `docs/` at build time, so a change to it alone must still publish.
+
 3. **Add a `publish-docs` job** that runs after the gate:
 
    ```yaml
@@ -87,6 +90,45 @@ pages:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 ```
+
+## Merge request previews
+
+GitLab can publish each merge request's docs beside the live site, under
+`mr-<iid>/`, using Pages parallel deployments. The MR shows the preview as an
+environment link, and GitLab deletes it when the MR closes or merges, or after a
+week, whichever comes first; a later push publishes it again. The job sets the
+week through a variable (GitLab's own default is 24 hours) and pins the live
+site's expiry to `never`, since GitLab doesn't document whether `expire_in`
+reaches the unprefixed deployment. A variable in `expire_in` needs GitLab 17.11
+or later.
+
+**Parallel deployments need GitLab Premium or Ultimate.** GitLab doesn't
+document what a Free-tier project does with a `path_prefix`, and the failure
+worth fearing is an MR's docs landing on the live site. So the script writes
+previews only when passed `--previews`, and you pass it only after the user
+confirms the project's tier.
+
+With `--previews`, the `pages:` job (written, or printed for an existing
+`.gitlab-ci.yml`) sets `pages.path_prefix` from a variable that is empty on the
+default branch and `mr-$CI_MERGE_REQUEST_IID` in a merge request pipeline.
+
+The merge request rule makes GitLab run merge request pipelines. In a
+`.gitlab-ci.yml` whose other jobs run on branch pipelines and that has no
+`workflow: rules`, a push to an MR branch then runs two pipelines. If that's
+the case, add the usual switch at the top of the file:
+
+```yaml
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+```
+
+GitHub Pages has no built-in previews. The third-party actions that add them
+publish to a `gh-pages` branch, which doesn't fit the Actions-source deploy the
+script writes, so the script refuses `--previews` on GitHub.
 
 ## One-time Pages setup
 

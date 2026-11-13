@@ -75,6 +75,11 @@ The flags and what each file holds are in
 because it can't tell the host, ask the user where the source lives and re-run
 with `--host` and `--repo-url`; don't guess.
 
+On GitLab, offer merge request previews: each MR's docs published beside the
+live site. Pass `--previews` only once the user confirms the project is on
+Premium or Ultimate, since previews need GitLab's parallel deployments
+([why that matters](references/ci-integration.md#merge-request-previews)).
+
 Read the summary and the follow-ups it prints. The steps below are those
 follow-ups.
 
@@ -160,6 +165,12 @@ content:
 
 **[Read the docs](https://owner.github.io/project/)**
 ```
+
+Take the URL from a reliable source, never by building one from the remote: the
+script's `Expected URL` when it printed one, otherwise the host's Pages settings
+or the deploy's own output (`$CI_PAGES_URL` on GitLab) after the first deploy.
+The script prints no URL when it can't be sure, as on GitHub Enterprise or any
+GitLab, which may give a project a unique domain.
 
 Check that the URL resolves before writing it. A hash-routed site can live at
 `/<repo>/`, `/<repo>/#/`, or a subpath, and a wrong link is worse than none:

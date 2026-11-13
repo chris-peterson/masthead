@@ -83,6 +83,34 @@ class BootstrapTest(unittest.TestCase):
         self.assertIn("name: 'Widget Docs'", self.repo.read("docs/index.html"))
         self.assertIn("github.com/example-org/widget/settings/pages", r.stdout)
 
+    def test_enterprise_github_prints_no_guessed_url(self):
+        repo = Repo("git@github.acme.example:team/widget.git")
+        self.addCleanup(repo.close)
+        r = repo.run("--host", "github", "--repo-url", "https://github.acme.example/team/widget")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertNotIn("github.io", r.stdout)
+        self.assertNotIn("https://github.com/", r.stdout)
+        self.assertIn("https://github.acme.example/team/widget/settings/pages", r.stdout)
+
+    def test_user_site_and_cname_urls(self):
+        repo = Repo("git@github.com:example-org/example-org.github.io.git")
+        self.addCleanup(repo.close)
+        r = repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("Expected URL:     https://example-org.github.io/ ", r.stdout)
+        self.repo.write("docs/CNAME", "docs.example.com\n")
+        r = self.repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("Expected URL:     https://docs.example.com/ ", r.stdout)
+
+    def test_gitlab_prints_where_to_read_the_url(self):
+        repo = Repo("https://gitlab.example.com/group/widget.git")
+        self.addCleanup(repo.close)
+        r = repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertNotIn("Expected URL", r.stdout)
+        self.assertIn("$CI_PAGES_URL", r.stdout)
+
     def test_gitlab_scaffold(self):
         repo = Repo("https://gitlab.example.com/group/widget.git")
         self.addCleanup(repo.close)
@@ -115,7 +143,54 @@ class BootstrapTest(unittest.TestCase):
         self.assertIn("mermaid.min.js", self.repo.read("docs/index.html"))
         self.assertIn("- [Requirements](/SPEC.md)", self.repo.read("docs/_sidebar.md"))
         self.assertIn("cp SPEC.md docs/SPEC.md", self.repo.read("justfile"))
-        self.assertIn("cp SPEC.md docs/SPEC.md", self.repo.read(".github/workflows/deploy-docs.yml"))
+        wf = self.repo.read(".github/workflows/deploy-docs.yml")
+        self.assertIn("cp SPEC.md docs/SPEC.md", wf)
+        self.assertIn("paths: ['docs/**', 'SPEC.md']", wf)
+        self.assertIn("docs/SPEC.md\n", self.repo.read(".gitignore"))
+
+    def test_spec_copy_already_ignored_is_left_alone(self):
+        self.repo.write("SPEC.md", "# Spec\n")
+        self.repo.write(".gitignore", "docs/*\n")
+        r = self.repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.repo.read(".gitignore"), "docs/*\n")
+
+    def test_no_spec_leaves_gitignore_alone(self):
+        r = self.repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertFalse((self.repo.path / ".gitignore").exists())
+        self.assertIn("paths: ['docs/**']", self.repo.read(".github/workflows/deploy-docs.yml"))
+
+    def test_gitlab_previews(self):
+        repo = Repo("https://gitlab.example.com/group/widget.git")
+        self.addCleanup(repo.close)
+        r = repo.run("--previews")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        ci = repo.read(".gitlab-ci.yml")
+        self.assertNotIn("pages: true", ci)
+        self.assertIn('path_prefix: "$PAGES_PREFIX"', ci)
+        self.assertIn("PAGES_PREFIX: mr-$CI_MERGE_REQUEST_IID", ci)
+        self.assertIn('$CI_PIPELINE_SOURCE == "merge_request_event"', ci)
+        self.assertIn("url: $CI_PAGES_URL", ci)
+        self.assertIn("PAGES_EXPIRE: never", ci)
+        self.assertIn("PAGES_EXPIRE: 1 week", ci)
+        self.assertIn("expire_in: $PAGES_EXPIRE", ci)
+
+    def test_gitlab_previews_with_existing_ci_prints_the_job(self):
+        repo = Repo("https://gitlab.example.com/group/widget.git")
+        self.addCleanup(repo.close)
+        repo.write(".gitlab-ci.yml", "build:\n  script: [make]\n")
+        r = repo.run("--previews")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(repo.read(".gitlab-ci.yml"), "build:\n  script: [make]\n")
+        self.assertIn("PAGES_PREFIX: mr-$CI_MERGE_REQUEST_IID", r.stdout)
+        self.assertIn("duplicate", r.stdout)
+
+    def test_previews_refused_on_github(self):
+        r = self.repo.run("--previews")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("GitLab only", r.stderr)
+        self.assertFalse((self.repo.path / "docs").exists())
 
     def test_existing_index_needs_force(self):
         self.repo.write("docs/index.html", "<html>mine</html>\n")

@@ -23,7 +23,7 @@ leaving a half-configured site.
 
 Usage:
   bootstrap.py [REPO_PATH] [--name NAME] [--host github|gitlab]
-               [--repo-url URL] [--langs l1,l2,...] [--force]
+               [--repo-url URL] [--langs l1,l2,...] [--force] [--previews]
 """
 
 import argparse
@@ -273,7 +273,79 @@ def ensure_justfile(repo, spec):
     return path.name, "appended"
 
 
-def write_ci(repo, host, branch, spec):
+def ignore_spec_copy(repo, spec):
+    """Ignore the copy of the spec that the preview recipe and the deploy put in
+    docs/, so it never gets committed beside the root original. Returns the
+    .gitignore state, or None when there is no spec."""
+    if not spec:
+        return None
+    rel = f"docs/{spec}"
+    try:
+        ignored = subprocess.run(
+            ["git", "-C", str(repo), "check-ignore", "-q", "--no-index", rel],
+            capture_output=True,
+        ).returncode == 0
+    except FileNotFoundError:
+        ignored = False
+    if ignored:
+        return "already ignored"
+    path = repo / ".gitignore"
+    text = path.read_text(encoding="utf-8") if path.exists() else ""
+    sep = "\n" if text and not text.endswith("\n") else ""
+    path.write_text(f"{text}{sep}{rel}\n", encoding="utf-8")
+    return "added"
+
+
+def gitlab_pages_job(spec, previews):
+    """The GitLab pages job. With previews, a merge request publishes to its own
+    parallel deployment under mr-<iid>, which GitLab deletes when the MR closes
+    or merges, or after a week. Parallel deployments need Premium or Ultimate,
+    which is why previews are opt-in: the script can't see the project's tier.
+
+    The live site's expiry is pinned to `never` rather than left unset: GitLab
+    doesn't document whether an expire_in reaches the unprefixed deployment, and
+    an expiring live site is the failure not worth risking."""
+    spec_step = f"    - cp {spec} docs/{spec}\n" if spec else ""
+    script = (
+        "  script:\n"
+        "    - mkdir -p public\n"
+        f"{spec_step}"
+        "    - cp -r docs/* public/\n"
+    )
+    if not previews:
+        return (
+            "pages:\n"
+            "  stage: deploy\n"
+            f"{script}"
+            "  pages: true\n"
+            "  rules:\n"
+            "    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH\n"
+        )
+    return (
+        "pages:\n"
+        "  stage: deploy\n"
+        "  variables:\n"
+        '    PAGES_PREFIX: ""\n'
+        "    PAGES_ENV: pages\n"
+        "    PAGES_EXPIRE: never\n"
+        f"{script}"
+        "  pages:\n"
+        '    path_prefix: "$PAGES_PREFIX"\n'
+        "    expire_in: $PAGES_EXPIRE\n"
+        "  environment:\n"
+        "    name: $PAGES_ENV\n"
+        "    url: $CI_PAGES_URL\n"
+        "  rules:\n"
+        "    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH\n"
+        '    - if: $CI_PIPELINE_SOURCE == "merge_request_event"\n'
+        "      variables:\n"
+        "        PAGES_PREFIX: mr-$CI_MERGE_REQUEST_IID\n"
+        "        PAGES_ENV: pages/mr-$CI_MERGE_REQUEST_IID\n"
+        "        PAGES_EXPIRE: 1 week\n"
+    )
+
+
+def write_ci(repo, host, branch, spec, previews=False):
     """Write the standalone CI file when no workflow exists yet. Returns a
     (path_or_None, note) tuple; note is set when the model must wire the deploy
     into an existing workflow by hand."""
@@ -292,6 +364,9 @@ def write_ci(repo, host, branch, spec):
             f"        run: cp {spec} docs/{spec}\n"
             if spec else ""
         )
+        # The spec lives at the root and is copied in at build time, so a
+        # change to it alone has to trigger the deploy too.
+        paths = ", ".join(f"'{p}'" for p in (["docs/**"] + ([spec] if spec else [])))
         wf_dir.mkdir(parents=True, exist_ok=True)
         path = wf_dir / "deploy-docs.yml"
         path.write_text(
@@ -299,7 +374,7 @@ def write_ci(repo, host, branch, spec):
             "on:\n"
             "  push:\n"
             f"    branches: [{branch}]\n"
-            "    paths: ['docs/**']\n"
+            f"    paths: [{paths}]\n"
             "  workflow_dispatch:\n"
             "permissions:\n"
             "  pages: write\n"
@@ -327,26 +402,42 @@ def write_ci(repo, host, branch, spec):
         return path, None
 
     # GitLab
-    spec_step = f"    - cp {spec} docs/{spec}\n" if spec else ""
-    job = (
-        "pages:\n"
-        "  stage: deploy\n"
-        "  script:\n"
-        "    - mkdir -p public\n"
-        f"{spec_step}"
-        "    - cp -r docs/* public/\n"
-        "  pages: true\n"
-        "  rules:\n"
-        "    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH\n"
-    )
+    job = gitlab_pages_job(spec, previews)
     path = repo / ".gitlab-ci.yml"
     if path.exists():
+        mr_note = (
+            " The merge request rule starts merge request pipelines; if the "
+            "file has no workflow: rules, check it won't run duplicate "
+            "pipelines (see references/ci-integration.md)."
+            if previews else ""
+        )
         return None, (
             ".gitlab-ci.yml already exists. Append this pages job by hand "
-            "(check that a `deploy` stage is declared):\n\n" + job
+            f"(check that a `deploy` stage is declared).{mr_note}\n\n" + job
         )
     path.write_text(job, encoding="utf-8")
     return path, None
+
+
+def pages_links(host, url, org, name, docs):
+    """Return (expected_url, settings_url), each None unless it is certain.
+
+    Only github.com derives a Pages URL from the remote. GitHub Enterprise
+    serves Pages from a domain its admin chose, and GitLab may give a project a
+    unique domain nobody can predict, so for those the summary points at where
+    the real URL shows up after the first deploy instead of guessing."""
+    if host != "github":
+        return None, None
+    settings = f"{url.rstrip('/')}/settings/pages"
+    if not url.startswith("https://github.com/"):
+        return None, settings
+    cname = docs / "CNAME"
+    if cname.is_file():
+        domain = cname.read_text(encoding="utf-8").strip()
+        return (f"https://{domain}/" if domain else None), settings
+    if name.lower() == f"{org.lower()}.github.io":
+        return f"https://{name.lower()}/", settings
+    return f"https://{org.lower()}.github.io/{name}/", settings
 
 
 def main():
@@ -358,6 +449,9 @@ def main():
     ap.add_argument("--langs", help="comma-separated Prism languages (overrides detection)")
     ap.add_argument("--force", action="store_true",
                     help="replace an existing docs/index.html with the current template")
+    ap.add_argument("--previews", action="store_true",
+                    help="GitLab only: publish each merge request to its own Pages "
+                         "preview (needs Premium or Ultimate)")
     args = ap.parse_args()
 
     repo = Path(args.repo).resolve()
@@ -381,6 +475,11 @@ def main():
         )
 
     host, url, org, repo_name = detect_host_and_url(repo, args.host, args.repo_url)
+    if args.previews and host != "gitlab":
+        die(
+            "--previews is GitLab only. GitHub Pages has no built-in preview "
+            "deployments; scaffold without it."
+        )
     name = args.name or repo_name or repo.name
     branch = default_branch(repo)
     langs = detect_langs(repo, args.langs.split(",") if args.langs else None)
@@ -400,7 +499,8 @@ def main():
     readme_new = seed_readme(docs, name)
     just_name, just_state = ensure_justfile(repo, spec)
     has_favicon = (docs / "favicon.svg").is_file()
-    ci_path, ci_note = write_ci(repo, host, branch, spec)
+    ignore_state = ignore_spec_copy(repo, spec)
+    ci_path, ci_note = write_ci(repo, host, branch, spec, args.previews)
 
     # ── Summary ─────────────────────────────────────────────
     print("Created / updated:")
@@ -408,8 +508,11 @@ def main():
     print(f"  docs/_sidebar.md  {'seeded' if sidebar_new else 'left as-is (already existed)'}")
     print(f"  docs/README.md    {'seeded home page' if readme_new else 'left as-is (already existed)'}")
     print(f"  {just_name:<17} `just docs` preview recipe ({just_state})")
+    if ignore_state == "added":
+        print(f"  .gitignore        ignores docs/{spec}, the copy the build makes")
     if ci_path:
-        print(f"  {ci_path.relative_to(repo).as_posix()}  publishes docs/ to Pages")
+        what = "publishes docs/ to Pages, and each MR to a preview" if args.previews else "publishes docs/ to Pages"
+        print(f"  {ci_path.relative_to(repo).as_posix()}  {what}")
     print()
     print(f"Source host:      {host} ({url})")
     print(f"Default branch:   {branch}")
@@ -417,8 +520,14 @@ def main():
     print(f"Mermaid:          {'used, CDN included' if mermaid else 'not used, CDN omitted'}")
     print(f"SPEC:             {spec if spec else 'none'}")
     print(f"Favicon:          {'present' if has_favicon else 'missing, design docs/favicon.svg'}")
-    if host == "github" and org and repo_name:
-        print(f"Expected URL:     https://{org.lower()}.github.io/{repo_name}/ (check it resolves before linking it)")
+    pages_url, settings_url = pages_links(host, url, org, repo_name, docs) if org and repo_name else (None, None)
+    if pages_url:
+        print(f"Expected URL:     {pages_url} (check it resolves before linking it)")
+    elif host == "github":
+        print(f"Pages URL:        not derivable on this server; after the first deploy, read it from {settings_url}")
+    else:
+        print("Pages URL:        not derivable (GitLab may assign a unique domain); after the first deploy, "
+              "read it from the project's Pages settings or $CI_PAGES_URL in the pages job log")
 
     print()
     print("Follow-ups (judgment, not done by this script):")
@@ -434,9 +543,10 @@ def main():
     steps.append("Link the hub from the top of the root README once its URL resolves.")
     if ci_note:
         steps.append(f"CI: {ci_note}")
-    if host == "github" and org and repo_name:
-        steps.append("Turn on GitHub Pages with GitHub Actions as the source: "
-                     f"https://github.com/{org}/{repo_name}/settings/pages")
+    if settings_url:
+        steps.append(f"Turn on GitHub Pages with GitHub Actions as the source: {settings_url}")
+    elif host == "github":
+        steps.append("Turn on GitHub Pages with GitHub Actions as the source, in the repo's Settings > Pages.")
     else:
         steps.append("Check Settings > Pages on GitLab once the pages job has run.")
     for i, step in enumerate(steps, 1):
