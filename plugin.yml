@@ -3,7 +3,7 @@
 # marketplace catalog (the suite: block), and commits the result to the branch.
 
 name: masthead
-version: 0.1.0
+version: 0.2.0
 description: "Bootstraps a documentation hub for a repo and keeps it current, on the docs engine you choose, so the people who come next can find how it works and what to watch out for."
 author: chris-peterson
 repository: https://github.com/chris-peterson/masthead
