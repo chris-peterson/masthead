@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **GitLab branch previews.** With `--previews`, each branch's docs publish beside the live site under `preview-<branch-slug>/`, linked from the branch's merge request, and expire after a week. Needs GitLab Premium or Ultimate.
+- **Site URLs for more repo shapes.** Bootstrap now prints the URL of a GitLab namespace site (`<group>/<group>.<pages-domain>`), says where a branch preview lands, and warns when the repo is a profile repo (`<owner>/<owner>`, `gitlab-profile`) whose README is a public profile.
+- **`gitlab_pages.py` reads and sets a GitLab project's Pages domain.** `status` prints the site URL, whether the unique domain is on, and every deployment; `unique-domain off` serves the site at the predictable namespace URL instead of `<project>-<hash>.<pages-domain>`.
+
+### Fixed
+
+- **A change to only the spec now republishes the GitHub site.** The spec is copied into the site at build time, and the workflow didn't trigger on it.
+- **No more guessed Pages URLs.** On GitHub Enterprise and GitLab project sites, bootstrap no longer prints a github.io URL or github.com settings link; it says where to read the real URL after the first deploy.
+
 ## 0.1.0
 
 ### Added

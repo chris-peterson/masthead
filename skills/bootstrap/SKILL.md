@@ -25,6 +25,9 @@ The mechanical scaffold is done by a script; the judgment stays with you.
 - **This page** covers what a script can't decide: what belongs in the hub, the
   home page, the navigation, the icon, and wiring the deploy into CI that
   already exists.
+- **`scripts/gitlab_pages.py`** reads a GitLab project's Pages settings (the
+  site URL, whether it has a unique domain, its deployments) and turns the
+  unique domain off. It's about the host, not the engine.
 - **`references/`** holds the material for one engine or one situation. Read a
   page when it applies, not before.
 
@@ -75,10 +78,25 @@ The flags and what each file holds are in
 because it can't tell the host, ask the user where the source lives and re-run
 with `--host` and `--repo-url`; don't guess.
 
-On GitLab, offer merge request previews: each MR's docs published beside the
+On GitLab, offer branch previews: each branch's docs published beside the
 live site. Pass `--previews` only once the user confirms the project is on
 Premium or Ultimate, since previews need GitLab's parallel deployments
-([why that matters](references/ci-integration.md#merge-request-previews)).
+([why that matters](references/ci-integration.md#branch-previews)).
+
+On GitLab, also ask whether the site should keep the unique domain GitLab gives
+new projects (`<project>-<hash>.<pages-domain>`) or be served at the namespace
+URL (`<group>.<pages-domain>/<project>/`), which is predictable and which the
+group's other sites can link to. Most hubs want the namespace URL. It's a
+project setting, so change it only once the user says to, after the first
+deploy:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/gitlab_pages.py" unique-domain off --repo [REPO_PATH]
+```
+
+It needs the Maintainer or Owner role; when the user doesn't have it, the
+setting is Deploy > Pages > "Use unique domain" for someone who does
+([unique domains](references/ci-integration.md#unique-domains-on-gitlab)).
 
 Read the summary and the follow-ups it prints. The steps below are those
 follow-ups.
@@ -168,9 +186,16 @@ content:
 
 Take the URL from a reliable source, never by building one from the remote: the
 script's `Expected URL` when it printed one, otherwise the host's Pages settings
-or the deploy's own output (`$CI_PAGES_URL` on GitLab) after the first deploy.
-The script prints no URL when it can't be sure, as on GitHub Enterprise or any
-GitLab, which may give a project a unique domain.
+or the deploy's own output after the first deploy. On GitLab,
+`gitlab_pages.py status` prints the site URL GitLab reports, the same value as
+the job's `$CI_PAGES_URL`.
+The script prints no URL when it can't be sure, as on GitHub Enterprise or a
+GitLab project site, which may get a unique domain. A user site
+(`<owner>.github.io`) and a GitLab namespace site (`<group>.<pages-domain>`)
+live at the root of their domain, not under `/<repo>/`;
+[where the site lands](references/ci-integration.md#where-the-site-lands) has
+every shape, the preview URLs, and the profile repos (`<owner>/<owner>`) whose
+README is a public profile rather than a project page.
 
 Check that the URL resolves before writing it. A hash-routed site can live at
 `/<repo>/`, `/<repo>/#/`, or a subpath, and a wrong link is worse than none:
@@ -198,7 +223,10 @@ the settings URL; tell the user to set the source to GitHub Actions.
 entry. A docsify 404 renders inside a page that loaded fine, so a dead link
 doesn't show up as an error anywhere else. Then run the search and contrast
 checks described in
-[the docsify reference](references/docsify.md#verifying-the-site).
+[the docsify reference](references/docsify.md#verifying-the-site). After a
+deploy, or on a branch preview, check the deployed site at the URL its
+repo's shape gives
+([where the site lands](references/ci-integration.md#where-the-site-lands)).
 
 End with a short summary for the user: the engine used, what was written, which
 pages went in the hub and which were turned away (and where they belong), and

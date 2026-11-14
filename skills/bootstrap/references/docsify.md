@@ -47,7 +47,7 @@ judgment steps in SKILL.md.
 | `--name NAME` | The project name differs from the repo name |
 | `--langs l1,l2,...` | Override the detected Prism language list |
 | `--force` | Replace an existing `docs/index.html` with the current template |
-| `--previews` | GitLab only: publish each merge request to its own Pages preview. Needs Premium or Ultimate; see [CI integration](ci-integration.md#merge-request-previews) |
+| `--previews` | GitLab only: publish each branch to its own Pages preview under `preview-<branch-slug>/`. Needs Premium or Ultimate; see [CI integration](ci-integration.md#branch-previews) |
 
 The script fails rather than guessing. It stops when:
 

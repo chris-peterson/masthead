@@ -113,4 +113,4 @@ A real function is strictly better: same behavior, statically analyzable, closes
 
 ## Setting up several repos in one session
 
-When bootstrapping multiple repos in one session, use `git -C /path/to/repo` instead of `cd` to avoid working directory drift. Verify the current branch with `git branch --show-current` before committing: feature branches in multi-repo sessions cause cherry-pick cleanup.
+When bootstrapping multiple repos in one session, use `git -C /path/to/repo` instead of `cd` to avoid working directory drift. Verify the current branch with `git branch --show-current` before committing: feature branches in multi-repo sessions cause cherry-pick cleanup. Since Claude Code 2.1.325 even read-only git (`status`, `branch`, `log`) asks first in a repo that isn't the session's project or a trusted folder: start the session with `--add-dir /path/to/repo` for each repo you'll bootstrap. The `additionalDirectories` setting doesn't cover it.

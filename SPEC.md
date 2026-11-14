@@ -203,8 +203,9 @@ the settings URL on GitHub.
 
 #### `PUBLISH-05`
 Where the hub's Pages URL follows from the remote (a github.com repo, its
-`<owner>.github.io` user site, or a `docs/CNAME` domain), the scaffold shall
-print it.
+`<owner>.github.io` user site, a `docs/CNAME` domain, or a top-level GitLab
+project named `<namespace>.<pages-domain>`), the scaffold shall print it, at
+the domain's root for a user or namespace site.
 
 #### `PUBLISH-06`
 Where the repo has a spec, the GitHub workflow the scaffold writes shall also
@@ -212,8 +213,9 @@ publish on a push that changes only the spec.
 
 #### `PUBLISH-07`
 Where `--previews` is passed for a GitLab repo, the `pages` job shall publish
-each merge request's docs to a Pages parallel deployment under `mr-<iid>`,
-linked from the merge request as an environment, that expires after a week while
+each non-default branch's docs to a Pages parallel deployment under
+`preview-<branch-slug>`, as a `preview/<branch-slug>` environment, that expires
+after a week while
 the live site never expires.
 
 #### `PUBLISH-08`
@@ -221,15 +223,37 @@ If `--previews` is passed for a GitHub repo, then the scaffold shall exit
 non-zero, saying GitHub Pages has no built-in previews, and write nothing.
 
 #### `PUBLISH-09`
-When the hub is on GitLab, masthead shall offer merge request previews, and pass
+When the hub is on GitLab, masthead shall offer branch previews, and pass
 `--previews` only after the user confirms the project is on a tier with parallel
 deployments (Premium or Ultimate).
 
 #### `PUBLISH-10`
-If the hub's Pages URL can't be derived for certain (GitHub Enterprise, or any
-GitLab), then the scaffold shall print no URL and say where to read the real one
+If the hub's Pages URL can't be derived for certain (GitHub Enterprise, or a
+GitLab project that isn't a namespace site), then the scaffold shall print no URL and say where to read the real one
 after the first deploy, and masthead shall link the README only to a URL from
 that source.
+
+#### `PUBLISH-11`
+Where `--previews` is passed, the scaffold shall say where a branch's preview
+lands (the site URL plus `preview-<branch-slug>/` when the site URL is known)
+and name the preview's environment link as the URL to trust.
+
+#### `PUBLISH-12`
+If the repo is a profile repo (`<owner>/<owner>`, or `<group>/gitlab-profile`
+on GitLab), then the scaffold shall say which profile page its README renders
+on, and masthead shall confirm with the user before linking the hub under that
+README's title.
+
+#### `PUBLISH-13`
+When the hub is on GitLab, masthead shall ask whether the site keeps GitLab's
+unique domain or is served at the namespace URL, and turn the unique domain off
+(`gitlab_pages.py unique-domain off`) only after the user says to.
+
+#### `PUBLISH-14`
+`gitlab_pages.py status` shall print the site URL, whether the unique domain is
+on, and each deployment's URL and path prefix, reading the project and host from
+the origin remote unless `--project` and `--hostname` are passed; if GitLab
+refuses a change, then it shall exit non-zero naming the role the change needs.
 
 ### `CHECK`
 Site checks

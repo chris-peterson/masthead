@@ -297,9 +297,9 @@ def ignore_spec_copy(repo, spec):
 
 
 def gitlab_pages_job(spec, previews):
-    """The GitLab pages job. With previews, a merge request publishes to its own
-    parallel deployment under mr-<iid>, which GitLab deletes when the MR closes
-    or merges, or after a week. Parallel deployments need Premium or Ultimate,
+    """The GitLab pages job. With previews, every other branch publishes to its
+    own parallel deployment under preview-<branch slug>, which expires after a
+    week. Parallel deployments need Premium or Ultimate,
     which is why previews are opt-in: the script can't see the project's tier.
 
     The live site's expiry is pinned to `never` rather than left unset: GitLab
@@ -337,10 +337,10 @@ def gitlab_pages_job(spec, previews):
         "    url: $CI_PAGES_URL\n"
         "  rules:\n"
         "    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH\n"
-        '    - if: $CI_PIPELINE_SOURCE == "merge_request_event"\n'
+        "    - if: $CI_COMMIT_BRANCH\n"
         "      variables:\n"
-        "        PAGES_PREFIX: mr-$CI_MERGE_REQUEST_IID\n"
-        "        PAGES_ENV: pages/mr-$CI_MERGE_REQUEST_IID\n"
+        "        PAGES_PREFIX: preview-$CI_COMMIT_REF_SLUG\n"
+        "        PAGES_ENV: preview/$CI_COMMIT_REF_SLUG\n"
         "        PAGES_EXPIRE: 1 week\n"
     )
 
@@ -406,9 +406,8 @@ def write_ci(repo, host, branch, spec, previews=False):
     path = repo / ".gitlab-ci.yml"
     if path.exists():
         mr_note = (
-            " The merge request rule starts merge request pipelines; if the "
-            "file has no workflow: rules, check it won't run duplicate "
-            "pipelines (see references/ci-integration.md)."
+            " Previews run on branch pipelines; if the file's workflow: rules "
+            "allow only merge request pipelines, see references/ci-integration.md."
             if previews else ""
         )
         return None, (
@@ -419,14 +418,56 @@ def write_ci(repo, host, branch, spec, previews=False):
     return path, None
 
 
+def _repo_path(url):
+    """The repo's path segments on its host: ['group', 'sub', 'project']."""
+    m = re.match(r"https?://[^/]+/(.+?)/?$", url)
+    return m.group(1).split("/") if m else []
+
+
+def gitlab_namespace_site(url, name):
+    """True when the project is a GitLab namespace (user or group) site.
+
+    GitLab serves a top-level project named `<namespace>.<pages-domain>` at the
+    root of that domain (`ai-tools/ai-tools.pages.example.com` at
+    https://ai-tools.pages.example.com/), so its name is its URL. Its examples
+    are all top-level, so a subgroup project with that shape isn't trusted."""
+    parts = _repo_path(url)
+    return len(parts) == 2 and name.lower().startswith(f"{parts[0].lower()}.")
+
+
+def profile_page(host, url, org, name):
+    """Return the profile page this repo's README renders on, or None.
+
+    A profile repo's README is the user's or group's public profile, not a
+    project page: GitHub shows `<owner>/<owner>` at github.com/<owner>, and
+    GitLab shows `<user>/<user>` on the user's profile and
+    `<group>/gitlab-profile` on the group's overview."""
+    m = re.match(r"(https?://[^/]+)/", url)
+    parts = _repo_path(url)
+    if not m or not parts:
+        return None
+    base = m.group(1)
+    if len(parts) == 2 and parts[0].lower() == parts[1].lower():
+        return f"{base}/{parts[0]}"
+    if host == "gitlab" and len(parts) >= 2 and parts[-1] == "gitlab-profile":
+        return f"{base}/{'/'.join(parts[:-1])}"
+    return None
+
+
 def pages_links(host, url, org, name, docs):
     """Return (expected_url, settings_url), each None unless it is certain.
 
-    Only github.com derives a Pages URL from the remote. GitHub Enterprise
-    serves Pages from a domain its admin chose, and GitLab may give a project a
-    unique domain nobody can predict, so for those the summary points at where
-    the real URL shows up after the first deploy instead of guessing."""
-    if host != "github":
+    github.com derives a Pages URL from the remote: `<owner>.github.io` is the
+    user or org site at the domain's root, anything else is a project site
+    under `/<repo>/`. On GitLab only a namespace site's URL follows from the
+    remote, because its project name is its domain; any other project's domain
+    is the instance's choice, and may be a unique one nobody can predict.
+    GitHub Enterprise serves Pages from a domain its admin chose. For those the
+    summary points at where the real URL shows up after the first deploy
+    instead of guessing."""
+    if host == "gitlab":
+        if gitlab_namespace_site(url, name):
+            return f"https://{name.lower()}/", None
         return None, None
     settings = f"{url.rstrip('/')}/settings/pages"
     if not url.startswith("https://github.com/"):
@@ -450,8 +491,8 @@ def main():
     ap.add_argument("--force", action="store_true",
                     help="replace an existing docs/index.html with the current template")
     ap.add_argument("--previews", action="store_true",
-                    help="GitLab only: publish each merge request to its own Pages "
-                         "preview (needs Premium or Ultimate)")
+                    help="GitLab only: publish each branch to its own Pages preview "
+                         "(needs Premium or Ultimate)")
     args = ap.parse_args()
 
     repo = Path(args.repo).resolve()
@@ -511,7 +552,7 @@ def main():
     if ignore_state == "added":
         print(f"  .gitignore        ignores docs/{spec}, the copy the build makes")
     if ci_path:
-        what = "publishes docs/ to Pages, and each MR to a preview" if args.previews else "publishes docs/ to Pages"
+        what = "publishes docs/ to Pages, and each branch to a preview" if args.previews else "publishes docs/ to Pages"
         print(f"  {ci_path.relative_to(repo).as_posix()}  {what}")
     print()
     print(f"Source host:      {host} ({url})")
@@ -523,11 +564,23 @@ def main():
     pages_url, settings_url = pages_links(host, url, org, repo_name, docs) if org and repo_name else (None, None)
     if pages_url:
         print(f"Expected URL:     {pages_url} (check it resolves before linking it)")
+        if host == "gitlab":
+            print("                  a GitLab namespace site; with unique domains on, GitLab serves it "
+                  "from a generated domain and redirects this URL there (gitlab_pages.py unique-domain off)")
     elif host == "github":
         print(f"Pages URL:        not derivable on this server; after the first deploy, read it from {settings_url}")
     else:
         print("Pages URL:        not derivable (GitLab may assign a unique domain); after the first deploy, "
-              "read it from the project's Pages settings or $CI_PAGES_URL in the pages job log")
+              "read it with `gitlab_pages.py status` or from $CI_PAGES_URL in the pages job log")
+
+    if args.previews:
+        where = f"{pages_url}preview-<branch-slug>/ " if pages_url else "preview-<branch-slug>/ under the site URL "
+        print(f"Branch previews:  {where}(the preview/<branch-slug> environment link is the one to trust; "
+              "$CI_PAGES_URL carries the prefix on GitLab 17.9+)")
+    profile = profile_page(host, url, org, repo_name) if repo_name else None
+    if profile:
+        print(f"Profile repo:     this README renders as the profile at {profile}, so a docs link "
+              "under its title shows there")
 
     print()
     print("Follow-ups (judgment, not done by this script):")
@@ -548,7 +601,9 @@ def main():
     elif host == "github":
         steps.append("Turn on GitHub Pages with GitHub Actions as the source, in the repo's Settings > Pages.")
     else:
-        steps.append("Check Settings > Pages on GitLab once the pages job has run.")
+        steps.append("Once the pages job has run, ask whether to keep GitLab's unique domain or serve "
+                     "the namespace URL (`gitlab_pages.py unique-domain off`), then read the site URL "
+                     "with `gitlab_pages.py status`.")
     for i, step in enumerate(steps, 1):
         print(f"  {i}. {step}")
 

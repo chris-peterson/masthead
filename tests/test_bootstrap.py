@@ -5,6 +5,7 @@ and the announce script, run against throwaway git repos.
 """
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -111,6 +112,51 @@ class BootstrapTest(unittest.TestCase):
         self.assertNotIn("Expected URL", r.stdout)
         self.assertIn("$CI_PAGES_URL", r.stdout)
 
+    def test_gitlab_namespace_site_url(self):
+        repo = Repo("git@gitlab.example.com:docs-team/docs-team.pages.example.com.git")
+        self.addCleanup(repo.close)
+        r = repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("Expected URL:     https://docs-team.pages.example.com/ ", r.stdout)
+        self.assertIn("unique domains", r.stdout)
+
+    def test_gitlab_subgroup_namespace_shape_is_not_trusted(self):
+        repo = Repo("https://gitlab.example.com/docs-team/sub/sub.pages.example.com.git")
+        self.addCleanup(repo.close)
+        r = repo.run()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertNotIn("Expected URL", r.stdout)
+
+    def test_gitlab_previews_print_where_they_land(self):
+        repo = Repo("git@gitlab.example.com:docs-team/docs-team.pages.example.com.git")
+        self.addCleanup(repo.close)
+        r = repo.run("--previews")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("https://docs-team.pages.example.com/preview-<branch-slug>/", r.stdout)
+        repo = Repo("https://gitlab.example.com/group/widget.git")
+        self.addCleanup(repo.close)
+        r = repo.run("--previews")
+        self.assertIn("Branch previews:", r.stdout)
+        self.assertIn("environment link", r.stdout)
+
+    def test_profile_repos_are_flagged(self):
+        cases = [
+            ("git@github.com:example-org/example-org.git", "https://github.com/example-org"),
+            ("https://gitlab.example.com/someone/someone.git", "https://gitlab.example.com/someone"),
+            ("https://gitlab.example.com/group/sub/gitlab-profile.git", "https://gitlab.example.com/group/sub"),
+        ]
+        for origin, profile in cases:
+            repo = Repo(origin)
+            self.addCleanup(repo.close)
+            r = repo.run()
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn(f"profile at {profile},", r.stdout)
+        gh = Repo("git@github.com:example-org/example-org.git")
+        self.addCleanup(gh.close)
+        r = gh.run()
+        self.assertIn("Expected URL:     https://example-org.github.io/example-org/ ", r.stdout)
+        self.assertNotIn("Profile repo", self.repo.run().stdout)
+
     def test_gitlab_scaffold(self):
         repo = Repo("https://gitlab.example.com/group/widget.git")
         self.addCleanup(repo.close)
@@ -169,8 +215,9 @@ class BootstrapTest(unittest.TestCase):
         ci = repo.read(".gitlab-ci.yml")
         self.assertNotIn("pages: true", ci)
         self.assertIn('path_prefix: "$PAGES_PREFIX"', ci)
-        self.assertIn("PAGES_PREFIX: mr-$CI_MERGE_REQUEST_IID", ci)
-        self.assertIn('$CI_PIPELINE_SOURCE == "merge_request_event"', ci)
+        self.assertIn("PAGES_PREFIX: preview-$CI_COMMIT_REF_SLUG", ci)
+        self.assertIn("PAGES_ENV: preview/$CI_COMMIT_REF_SLUG", ci)
+        self.assertNotIn("merge_request_event", ci)
         self.assertIn("url: $CI_PAGES_URL", ci)
         self.assertIn("PAGES_EXPIRE: never", ci)
         self.assertIn("PAGES_EXPIRE: 1 week", ci)
@@ -183,8 +230,8 @@ class BootstrapTest(unittest.TestCase):
         r = repo.run("--previews")
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(repo.read(".gitlab-ci.yml"), "build:\n  script: [make]\n")
-        self.assertIn("PAGES_PREFIX: mr-$CI_MERGE_REQUEST_IID", r.stdout)
-        self.assertIn("duplicate", r.stdout)
+        self.assertIn("PAGES_PREFIX: preview-$CI_COMMIT_REF_SLUG", r.stdout)
+        self.assertIn("merge request pipelines", r.stdout)
 
     def test_previews_refused_on_github(self):
         r = self.repo.run("--previews")
@@ -262,6 +309,73 @@ class AnnounceTest(unittest.TestCase):
                 r = self.announce(*args)
                 self.assertEqual(r.returncode, 0)
                 self.assertEqual(r.stdout, "")
+
+
+GITLAB_PAGES = ROOT / "skills" / "bootstrap" / "scripts" / "gitlab_pages.py"
+
+FAKE_GLAB = """#!/bin/sh
+printf '%s\\n' "$@" > "$GLAB_ARGS"
+if [ -n "$GLAB_FAIL" ]; then echo "$GLAB_FAIL" >&2; exit 1; fi
+case "$*" in
+  *pages_unique_domain_enabled=false*) unique=false; url="https://group.pages.example.com/widget" ;;
+  *) unique=true; url="https://widget-a1b2c3.pages.example.com" ;;
+esac
+printf '{"url":"%s","is_unique_domain_enabled":%s,"deployments":[{"url":"%s","path_prefix":null},{"url":"%s/preview-fix-nav","path_prefix":"preview-fix-nav"}]}' "$url" "$unique" "$url" "$url"
+"""
+
+
+class GitlabPagesTest(unittest.TestCase):
+    """gitlab_pages.py against a stub glab that records its arguments."""
+
+    def setUp(self):
+        self.repo = Repo("git@gitlab.example.com:group/widget.git")
+        self.addCleanup(self.repo.close)
+        self.bin = Path(self.repo.tmp.name) / "bin"
+        self.bin.mkdir()
+        glab = self.bin / "glab"
+        glab.write_text(FAKE_GLAB, encoding="utf-8")
+        glab.chmod(0o755)
+        self.args_file = Path(self.repo.tmp.name) / "glab-args"
+
+    def run_script(self, *args, fail=""):
+        env = {**os.environ, "PATH": f"{self.bin}{os.pathsep}{os.environ['PATH']}",
+               "GLAB_ARGS": str(self.args_file), "GLAB_FAIL": fail}
+        return subprocess.run(
+            [sys.executable, str(GITLAB_PAGES), *args, "--repo", str(self.repo.path)],
+            capture_output=True, text=True, env=env,
+        )
+
+    def glab_args(self):
+        return self.args_file.read_text(encoding="utf-8").splitlines()
+
+    def test_status_reads_the_project_from_origin(self):
+        r = self.run_script("status")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        args = self.glab_args()
+        self.assertEqual(args[:4], ["api", "--hostname", "gitlab.example.com", "projects/group%2Fwidget/pages"])
+        self.assertNotIn("--method", args)
+        self.assertIn("Site URL:       https://widget-a1b2c3.pages.example.com", r.stdout)
+        self.assertIn("Unique domain:  on", r.stdout)
+        self.assertIn("preview-fix-nav", r.stdout)
+
+    def test_unique_domain_off_patches_the_setting(self):
+        r = self.run_script("unique-domain", "off")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        args = self.glab_args()
+        self.assertIn("PATCH", args)
+        self.assertIn("pages_unique_domain_enabled=false", args)
+        self.assertIn("Unique domain:  off", r.stdout)
+        self.assertIn("https://group.pages.example.com/widget", r.stdout)
+
+    def test_project_flag_overrides_origin(self):
+        r = self.run_script("status", "--project", "other/sub/site", "--hostname", "git.example.org")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.glab_args()[2:4], ["git.example.org", "projects/other%2Fsub%2Fsite/pages"])
+
+    def test_forbidden_names_the_role(self):
+        r = self.run_script("unique-domain", "off", fail="glab: 403 Forbidden (HTTP 403)")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("Maintainer", r.stderr)
 
 
 if __name__ == "__main__":
