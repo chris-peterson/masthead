@@ -12,6 +12,10 @@
 
 - **Bootstrap points at `/masthead:update-docs`** when `docs/index.html` already exists, instead of asking you to diff the template by hand.
 
+### Fixed
+
+- **The suite's events page names where `content.routed` comes from.** The declaration now points at the bootstrap skill, and a test fails if the skill stops announcing the key it declares.
+
 ## 0.2.0
 
 ### Added
