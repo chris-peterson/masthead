@@ -51,6 +51,7 @@ suite:
   describe:
     skills:
       bootstrap: This skill should be used when the user wants a documentation hub for a repo, such as "/masthead:bootstrap", "set up a docs site for this repo", "give this project a pages site", "bootstrap docsify here", "publish these docs to GitHub Pages", or "add a docs hub".
+      update-docs: This skill should be used when the user wants an existing documentation hub brought up to date, such as "/masthead:update-docs", "update the docs site", "this docsify site needs the latest fixes", "fix the sidebar on our docs", "add a table of contents to the docs", or "check the docs hub against best practices".
   # <<< shipyard:describe <<<
 
 docs:
