@@ -33,6 +33,7 @@ events:
         (instructions for whoever is changing the code). Fires once per piece of
         content masthead turns away, so the agent can hand it to whoever places
         content for that audience
+      emitted_by: skills/bootstrap/SKILL.md
       fields:
         tier: the audience the content belongs to, agent or maintainer
         path: the file the content was in, or would have gone to, relative to the repo root

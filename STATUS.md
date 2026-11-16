@@ -20,7 +20,7 @@ that implements them.
 | SCAFFOLD-01..15 | 15 | All Covered | `skills/bootstrap/scripts/docsify/bootstrap.py` (`main`, `other_owner`, `detect_host_and_url`, `render_index`, `detect_langs`, `uses_mermaid`, `seed_sidebar`, `seed_readme`, `ensure_justfile`, `detect_spec`, `ignore_spec_copy`); theme and site features in `skills/bootstrap/assets/docsify/index.html` |
 | SCAFFOLD-16..17 | 2 | All Covered | `skills/bootstrap/scripts/docsify/template_blocks.py` (`generator`, `fingerprint`); `bootstrap.py` (`main`); the `page-toc` and `page-toc-style` blocks of `assets/docsify/index.html` |
 | AUDIENCE-01..06 | 6 | All Covered | `skills/bootstrap/SKILL.md` (4. Sort the existing docs by audience) |
-| EVENTS-01..03 | 3 | All Covered | `scripts/announce.sh`; `skills/bootstrap/SKILL.md` (step 4) |
+| EVENTS-01..03 | 3 | All Covered | `scripts/announce.sh`; `skills/bootstrap/SKILL.md` (step 4). EVENTS-02..03 cite the suite contract rather than restate it; `DeclaredPublishesTest` holds the declaration to the skill that emits it |
 | CONTENT-01..04 | 4 | All Covered | `skills/bootstrap/SKILL.md` (steps 5 to 8) |
 | PUBLISH-01..14 | 14 | All Covered | `skills/bootstrap/scripts/docsify/bootstrap.py` (`write_ci`, `gitlab_pages_job`, `pages_links`, `gitlab_namespace_site`, `profile_page`, `main`); `skills/bootstrap/scripts/gitlab_pages.py`; `skills/bootstrap/references/ci-integration.md`; `skills/bootstrap/SKILL.md` (steps 3 and 9) |
 | CHECK-01..04 | 4 | All Covered | `skills/bootstrap/SKILL.md` (10. Preview and verify); `skills/bootstrap/scripts/docsify/check-search.js`, `check-contrast.js` |
@@ -54,6 +54,12 @@ page-contents rail in the template), and the UPDATE category for
 local edits; and the LINT category for the checks it runs on the sidebar and
 pages against the engine reference's practices. SCAFFOLD-03 now names the new
 skill in its refusal. All implemented alongside.
+
+### 2026-11-15: Events against the suite contract
+
+EVENTS-02 and EVENTS-03 reworded to cite bridge.ai WIRE and EMIT rather than
+restate them. The `content.routed` declaration gained its `emitted_by`, and
+`DeclaredPublishesTest` checks it against the skill. Coverage unchanged.
 
 ### 2026-11-13: Site URL shapes
 
