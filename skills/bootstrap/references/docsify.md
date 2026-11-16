@@ -17,6 +17,8 @@ as it is.
   check, then back.
 - GitHub-style annotations (`> [!NOTE]`, `> [!WARNING]`, and so on).
 - Full-text search, indexed from the rendered text rather than the raw markdown.
+- A page-contents rail beside each page on a wide screen, listing its headings
+  and highlighting the one being read.
 - A link back to the source repository on GitHub or GitLab.
 - A CI workflow that publishes `docs/` to Pages, when the repo has no CI yet.
 
@@ -31,7 +33,7 @@ git repo, then scaffolds in place:
 
 | Writes | When |
 |--------|------|
-| `docs/index.html` | Always, from `assets/docsify/index.html` with a handful of substitutions |
+| `docs/index.html` | Always, from `assets/docsify/index.html` with a handful of substitutions, stamped with the template it came from |
 | `docs/_sidebar.md` | Only if missing: a `Home` entry, plus `Requirements` for a spec-driven repo |
 | `docs/README.md` | Only if missing: a placeholder home page |
 | a `docs` recipe in the justfile | Appended, or a new justfile; left alone if a `docs` recipe exists |
@@ -56,9 +58,9 @@ The script fails rather than guessing. It stops when:
   (Sphinx), or `book.toml` (mdBook). Tell the user which one and stop.
 - **`docs/index.html` already exists.** It may be a site generated earlier from
   an older template, a hand-made one, or one that loads a
-  [shared loader](docsify-shared-loader.md). Diff it against
-  `assets/docsify/index.html` before deciding. `--force` replaces it, which
-  drops any changes made to it since.
+  [shared loader](docsify-shared-loader.md). `/masthead:update-docs` brings it
+  current and keeps its own edits (see [updating a site](#updating-a-site)).
+  `--force` replaces it, which drops any changes made to it since.
 - **The host can't be detected** and wasn't passed.
 
 ## The template
@@ -73,6 +75,25 @@ soft-wrap rules.
 Copying a real file is the point. A version of this skill that regenerated the
 template from prose each time dropped or mangled CSS rules without anyone
 noticing. Edit the template file itself; never retype it.
+
+### Blocks and the stamp
+
+Marker comments (`/* masthead:block <name> */`, `<!-- masthead:block <name> -->`,
+`// masthead:block <name>`) split the template into named blocks, one per
+concern: the palettes, the copy button, the sidebar layout, each plugin. The
+markers ship in every site, and the script stamps the site with the version of
+masthead and a fingerprint of the template it used:
+
+```html
+<meta name="generator" content="masthead <semver>; template <fingerprint>">
+```
+
+`assets/docsify/template-history.json` keeps every template a site may have been
+made from. A change to the template has to be recorded there
+(`just record-template`), or the test suite fails: a site made from an
+unrecorded template can't be updated block by block later. Keep the markers
+when editing the template, and give a new concern its own block rather than
+growing a neighbor's.
 
 [The template notes](docsify-template.md) record why each rule exists. Read them
 before changing a generated site's styles: every rule there fixes a bug that
@@ -199,7 +220,8 @@ merges them into one item and draws a stray chevron on a leaf:
 ```
 
 The template sets `subMaxLevel: 0`, so docsify doesn't add the page's own H1 as
-a phantom child of its sidebar entry.
+a phantom child of its sidebar entry. A page's headings belong in the
+page-contents rail, not the sidebar.
 
 ### Long lists get an index page
 
@@ -296,6 +318,43 @@ old `index.html` checks the old CSS.
 
 Don't bind `/` or any other bare key to focus search. Browsers and extensions
 use those keys, and the search box is always visible.
+
+## Updating a site
+
+`scripts/docsify/update.py` is the script behind `/masthead:update-docs`:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/docsify/update.py" [REPO_PATH] [flags]
+```
+
+| Flag | When |
+|------|------|
+| `--diff` | Print the diff for each upstream change, not only for conflicts |
+| `--json` | Print the report as JSON |
+| `--check` | Exit 1 while the template has moved on or any finding is open, for CI |
+| `--apply` | Write the merged template and re-stamp the site |
+| `--resolve <block>=site\|template` | With `--apply`: which side a conflicting block keeps (`all=…` for every one) |
+| `--adopt` | With `--apply` on an unstamped site: replace `docs/index.html` with the current template, rendered with the site's values |
+| `--docs DIR` | The site lives somewhere other than `docs/` |
+
+On a stamped site, it renders the stamped template and the current one with
+the site's own values and compares the three block by block: a block only the
+template changed is an upstream change, a block only the site changed is a
+local edit, and a block both changed is a conflict. Without a recognized stamp
+it prints one diff, unclassified.
+
+Its findings, each tied to a section of this page:
+
+| Rule | Reports |
+|------|---------|
+| `LINT-02` | A sidebar level that mixes `**Section**` labels with linked sections |
+| `LINT-03` | Sibling sidebar entries under a linked parent that share an href |
+| `LINT-04` | A sidebar section linking to the home route with `?id=` |
+| `LINT-05` | A sidebar entry or page link whose target is missing, outside `docs/`, or differs in letter case |
+| `LINT-06` | A relative link on a subdirectory page of a site without `relativePath: true` |
+| `LINT-07` | `subMaxLevel` above 0 |
+| `LINT-08` | A page no sidebar entry reaches, directly or through the pages it links |
+| `LINT-09` | No `docs/favicon.svg` |
 
 ## More
 

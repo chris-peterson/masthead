@@ -15,6 +15,9 @@ skills/bootstrap/    /masthead:bootstrap: SKILL.md is the engine-neutral flow;
                      references/<engine>*.md are one engine's adapter;
                      scripts/gitlab_pages.py reads and sets a GitLab
                      project's Pages domain
+skills/update-docs/  /masthead:update-docs: brings an existing hub current;
+                     its script is the engine's update.py under
+                     skills/bootstrap/scripts/<engine>/
 scripts/announce.sh  prints masthead's interop announcements (content.routed)
 tests/               unit tests for the scripts (`just test`)
 docs/                masthead's own docs site; hand-written pages are tracked,
@@ -30,6 +33,12 @@ as a plugin; `just validate` checks it the way CI does.
 The tests run the scripts against throwaway git repos, so they need `git` and
 `jq` on PATH. To run one test:
 `python3 -m unittest discover -s tests -k test_github_scaffold`.
+
+The docsify template is split into named blocks by `masthead:block` marker
+comments, and every template a site may have been made from is kept in
+`skills/bootstrap/assets/docsify/template-history.json`. After changing the
+template, run `just record-template`; the tests fail until you do. Keep the
+markers, and give a new concern its own block.
 
 `.gitignore` ignores `docs/*` and re-includes the hand-written pages one by one,
 so a new hand-written page needs its own `!docs/<page>.md` line or git won't

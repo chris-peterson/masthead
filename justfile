@@ -4,7 +4,7 @@ shipyard := "uvx --from 'git+https://github.com/chris-peterson/shipyard@v2' ship
 [private]
 default:
     @echo ""
-    @echo "  masthead stands up a docsify site for a repo and keeps it deploying."
+    @echo "  masthead stands up a docsify site for a repo and keeps it current."
     @echo ""
     @just --list --unsorted --list-prefix '    ' --list-heading ''
 
@@ -13,10 +13,15 @@ default:
 try:
     claude --plugin-dir .
 
-# Run the script tests (bootstrap scaffold, announcements)
+# Run the script tests (bootstrap scaffold, update, announcements)
 [group('check your work')]
 test:
     python3 -m unittest discover -s tests
+
+# Record the docsify template in its history, after changing it
+[group('check your work')]
+record-template:
+    python3 skills/bootstrap/scripts/docsify/template_blocks.py record
 
 # Regenerate the artifacts and list what the projection job would commit
 [group('check your work')]

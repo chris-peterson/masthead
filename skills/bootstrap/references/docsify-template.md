@@ -10,6 +10,7 @@ Everything else in the template ships as-is. `bootstrap.py` fills only these:
 
 | Placeholder | Filled with | Source |
 |-------------|-------------|--------|
+| `{{GENERATOR}}` | The stamp: `masthead <semver>; template <fingerprint>` | the plugin's version and `template_blocks.py` |
 | `{{PROJECT_NAME}}` | Project name (also `<title>`, meta description, sidebar `name`) | `--name`, else repo directory basename |
 | `{{REPO_URL}}` | Source repo URL, normalized to `https://…` (no `.git`) | git remote `origin`, or `--repo-url` |
 | `{{TITLEBAR_ACCENT_START}}` | Accent gradient start: purple (GitHub) or orange (GitLab); mid/end stay cyan/pink | detected host |
@@ -29,6 +30,39 @@ Each language becomes one tag, after the search/alerts/copy-code plugins:
 ```
 
 `bash` and `yaml` are always included; `json` is highlighted by Prism core and needs no plugin. The full extension→language map lives in `bootstrap.py` (`EXT_TO_PRISM`).
+
+## Blocks
+
+`masthead:block` marker comments divide the file into named blocks, which
+`update.py` compares one at a time against the template a site was made from.
+Keep each marker on its own line, keep the names unique, and start a new block
+for a new concern. Record every change with `just record-template`
+([why](docsify.md#blocks-and-the-stamp)).
+
+## Page-contents rail
+
+The `pageToc` plugin (block `page-toc`, styles in `page-toc-style`) lists the
+current page's h2 to h4 in a fixed column on the right, from 1280px up. Each
+choice in it fixes something a plugin got wrong on a real site
+([the recipe](docsify-recipes.md#build-the-page-contents-rail-from-ids-not-from-heading-html)):
+
+- **Rows come from each heading's id and text**, never its HTML, so a heading
+  whose text is a link doesn't put that outbound link in the rail.
+- **Rows indent by nesting, not by tag level**, so an h4 straight under an h2
+  sits one step in.
+- **The highlighted row is the last heading whose top has passed the top of the
+  window.** Highlighting the next heading in the top quarter jumps ahead on a
+  page of short sections.
+- **The rail scrolls itself to keep the highlighted row in view**, never the
+  page.
+- **`.content` gets right padding while the rail shows** (`body.has-page-toc`),
+  so the column never covers text. A page with fewer than two headings gets no
+  rail and no padding.
+- **The rail's top padding clears the 80px source-link corner.**
+
+A site turns it off with `pageToc: false` in `window.$docsify`. A page that
+renders headings after load (a data-driven catalog) dispatches
+`masthead:content-changed` on `document` to rebuild it.
 
 ## UI control placement
 

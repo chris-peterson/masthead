@@ -63,7 +63,8 @@ already exists:
   so stop and point the user at shipyard.
 - **An existing `docs/index.html`:** a site already made, perhaps from an older
   template, perhaps loading a [shared loader](references/docsify-shared-loader.md).
-  Diff it against the template before deciding anything.
+  Bringing it current is `/masthead:update-docs`, which carries the template's
+  fixes in and keeps the site's own edits; `--force` here would drop them.
 
 The docsify script checks all of these and refuses rather than overwriting.
 
@@ -234,6 +235,10 @@ anything left for them, such as turning on Pages.
 
 ## When the hub needs changes later
 
+- **The template has moved on, or the sidebar and pages have drifted:**
+  `/masthead:update-docs` carries the current template into the site, keeping
+  its local edits, and reports what departs from the practices in the engine
+  reference.
 - **Pages generated from data** (a reference built from a spec, a status page
   from scan results): [data-driven sites](references/data-driven-sites.md).
 - **A small JS behavior** (deep-link fixes, copy buttons on values, row anchors):

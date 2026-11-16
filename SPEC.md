@@ -28,6 +28,13 @@ below its category's heading, so every requirement has a linkable anchor
   plugins to react to (`content.routed`).
 - **Owner**: whatever already builds a repo's docs site, such as another engine,
   or shipyard for a plugin repo.
+- **Stamp**: the masthead version a site's template came from, recorded in the
+  site itself.
+- **Upstream change**: a difference between a site and the current template
+  that comes from the template having changed since the site was made.
+- **Local edit**: a difference that comes from someone changing the site.
+- **Finding**: one place where a hub departs from a practice its engine's
+  reference describes, with a rule ID and a pointer to that reference.
 
 ## Requirements
 
@@ -65,7 +72,8 @@ scaffold shall exit non-zero naming that tool and write nothing.
 
 #### `SCAFFOLD-03`
 If `docs/index.html` exists and `--force` was not passed, then the scaffold
-shall exit non-zero and write nothing.
+shall exit non-zero, name `/masthead:update-docs` as the way to bring the site
+current, and write nothing.
 
 #### `SCAFFOLD-04`
 If the source host can't be told from the origin remote and wasn't passed, then
@@ -118,6 +126,16 @@ the follow-ups left to judgment.
 #### `SCAFFOLD-15`
 Where the scaffold copies a spec into `docs/`, it shall add that copy to the
 repo's `.gitignore` unless git already ignores it.
+
+#### `SCAFFOLD-16`
+The scaffold shall stamp the site it writes with the masthead version and a
+fingerprint of the template it came from (on docsify, `<meta name="generator"
+content="masthead <semver>; template <fingerprint>">` in `docs/index.html`).
+
+#### `SCAFFOLD-17`
+The generated site shall show a page-contents rail listing the current page's
+headings, built from each heading's id and text, indented by nesting, and
+highlighting the section being read.
 
 ### `AUDIENCE`
 Audience routing
@@ -287,3 +305,100 @@ unchanged.
 #### `MAINTAIN-02`
 If a generated site shows a theme or layout defect, then masthead shall treat it
 as a defect in the engine's template until shown otherwise.
+
+### `UPDATE`
+Updating an existing hub (`/masthead:update-docs`)
+
+#### `UPDATE-01`
+If the repo has no hub one of masthead's adapters recognizes, then
+`/masthead:update-docs` shall say so, point at `/masthead:bootstrap`, and write
+nothing.
+
+#### `UPDATE-02`
+If another tool already builds the repo's docs site (the owners `SCAFFOLD-02`
+names), then `/masthead:update-docs` shall name that tool and write nothing.
+
+#### `UPDATE-03`
+Each engine adapter shall provide an update script that reads the template's
+substitution values back out of the existing site, renders the current template
+with them, and reports how the site differs from it, writing nothing unless
+`--apply` is passed.
+
+#### `UPDATE-04`
+Where the site carries a stamp, the update script shall classify each difference
+from the current template as an upstream change or a local edit.
+
+#### `UPDATE-05`
+If the site carries no stamp, then the update script shall report every
+difference unclassified, and masthead shall classify them by reading the
+template notes before proposing any change.
+
+#### `UPDATE-06`
+When applying a template update, masthead shall carry every upstream change into
+the site and keep every local edit, and if one part of the site holds both, then
+it shall show the user both versions and ask which to keep.
+
+#### `UPDATE-07`
+When the update script writes the current template into a site, it shall stamp
+the site with the current masthead version.
+
+#### `UPDATE-08`
+Where `--check` is passed, the update script shall exit non-zero when it reports
+any upstream change or finding, so CI can catch a hub falling behind.
+
+#### `UPDATE-09`
+When the update script reports a page no sidebar entry reaches (`LINT-08`),
+masthead shall put it through the audience test (`AUDIENCE-01` to
+`AUDIENCE-06`) before adding it to the sidebar.
+
+#### `UPDATE-10`
+masthead shall show each change it proposes and apply none until the user
+approves it.
+
+#### `UPDATE-11`
+Before reporting done, `/masthead:update-docs` shall run the site checks
+(`CHECK-01` to `CHECK-03`).
+
+#### `UPDATE-12`
+When `/masthead:update-docs` ends, masthead shall summarize the upstream changes
+applied, the local edits kept, the findings fixed, and the findings left, each
+with the reason it was left.
+
+### `LINT`
+Hub checks (the findings `/masthead:update-docs` reports)
+
+#### `LINT-01`
+The update script shall check the hub's sidebar and pages and report each
+finding with its rule ID, file, line, and the reference section that explains
+the practice.
+
+#### `LINT-02`
+The docsify update script shall report a sidebar level that mixes `**Section**`
+labels with linked sections.
+
+#### `LINT-03`
+The docsify update script shall report sibling sidebar entries under a linked
+parent that share an href.
+
+#### `LINT-04`
+The docsify update script shall report a sidebar section that links to the home
+route with an `?id=` anchor.
+
+#### `LINT-05`
+The docsify update script shall report a sidebar entry or page link whose target
+doesn't exist, or exists only under a different letter case.
+
+#### `LINT-06`
+The docsify update script shall report a page with a relative sibling link on a
+site that doesn't set `relativePath: true`.
+
+#### `LINT-07`
+The docsify update script shall report a site whose `subMaxLevel` adds pages'
+headings as sidebar children.
+
+#### `LINT-08`
+The docsify update script shall report a markdown page under `docs/` that no
+sidebar entry reaches.
+
+#### `LINT-09`
+The docsify update script shall report a site with no `docs/favicon.svg`.

@@ -32,6 +32,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import template_blocks
+
 # Extension / basename -> Prism language. json is highlighted by Prism core, so
 # it needs no component plugin and is intentionally absent here.
 EXT_TO_PRISM = {
@@ -214,11 +216,12 @@ def detect_spec(repo):
     return None
 
 
-def render_index(template, name, url, host, langs, mermaid):
+def render_index(template, name, url, host, langs, mermaid, generator):
     prism = "\n".join(
         f'  <script src="{PRISM_CDN.format(l)}"></script>' for l in langs
     )
     out = template
+    out = out.replace("{{GENERATOR}}", generator)
     out = out.replace("{{PROJECT_NAME}}", name)
     out = out.replace("{{REPO_URL}}", url)
     out = out.replace("{{TITLEBAR_ACCENT_START}}", ACCENT_START[host])
@@ -510,9 +513,9 @@ def main():
     index = docs / "index.html"
     if index.exists() and not args.force:
         die(
-            "docs/index.html already exists. Diff it against the template "
-            "(assets/docsify/index.html) and carry fixes across by hand, or "
-            "re-run with --force to replace it with the current template."
+            "docs/index.html already exists. Bring it current with "
+            "/masthead:update-docs, which keeps the site's own edits, or re-run "
+            "with --force to replace it with the current template."
         )
 
     host, url, org, repo_name = detect_host_and_url(repo, args.host, args.repo_url)
@@ -527,14 +530,15 @@ def main():
     mermaid = uses_mermaid(repo)
     spec = detect_spec(repo)
 
-    template_path = Path(__file__).resolve().parents[2] / "assets" / "docsify" / "index.html"
+    template_path = template_blocks.TEMPLATE
     if not template_path.is_file():
         die(f"template not found at {template_path}")
     template = template_path.read_text(encoding="utf-8")
 
     replaced = index.exists()
     docs.mkdir(exist_ok=True)
-    index.write_text(render_index(template, name, url, host, langs, mermaid), encoding="utf-8")
+    stamp = template_blocks.generator(template)
+    index.write_text(render_index(template, name, url, host, langs, mermaid, stamp), encoding="utf-8")
 
     sidebar_new = seed_sidebar(docs, spec)
     readme_new = seed_readme(docs, name)
@@ -555,6 +559,7 @@ def main():
         what = "publishes docs/ to Pages, and each branch to a preview" if args.previews else "publishes docs/ to Pages"
         print(f"  {ci_path.relative_to(repo).as_posix()}  {what}")
     print()
+    print(f"Template:         {stamp}")
     print(f"Source host:      {host} ({url})")
     print(f"Default branch:   {branch}")
     print(f"Prism languages:  {', '.join(langs)}")

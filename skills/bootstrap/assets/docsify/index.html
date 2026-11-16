@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- masthead:block head -->
   <meta charset="UTF-8">
+  <meta name="generator" content="{{GENERATOR}}">
   <title>{{PROJECT_NAME}}</title>
   <meta name="description" content="{{PROJECT_NAME}} documentation">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
@@ -12,6 +14,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.min.css">
   <style>
+    /* masthead:block palettes */
     /* ── Palettes (always available) ─────────────────────── */
     :root {
       --dracula-bg:         #282a36;
@@ -39,10 +42,12 @@
       --alucard-yellow:     #7f7113;
     }
 
+    /* masthead:block theme-switching */
     /* ── Theme switching (only sets color-scheme) ────────── */
     :root, [data-theme="dark"]  { color-scheme: dark; }
     [data-theme="light"]        { color-scheme: light; }
 
+    /* masthead:block semantic-tokens */
     /* ── Semantic mappings — light-dark(light, dark) ──────
          Every variable is defined once; forgetting a mode
          is impossible because both values sit side-by-side. */
@@ -160,6 +165,7 @@
       --icon-check:     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
     }
 
+    /* masthead:block element-overrides */
     /* ── Element overrides the theme doesn't cover ───────── */
     .markdown-section {
       color: var(--base-color);
@@ -277,6 +283,7 @@
       padding-left: 2ch;
       text-indent: -2ch;
     }
+    /* masthead:block copy-button */
     /* ── Copy button ───────────────────────────────────────
        docsify-copy-code ships a hard-cornered label block pinned to the
        panel corner that, on success, slides a "Copied" word out to its left.
@@ -335,6 +342,7 @@
       -webkit-mask-image: var(--icon-check);
               mask-image: var(--icon-check);
     }
+    /* masthead:block search */
     .sidebar {
       color: var(--base-color);
     }
@@ -430,6 +438,7 @@
       background-color: var(--search-result-keyword-background);
     }
 
+    /* masthead:block alerts */
     /* ── Annotation callout colors ─────────────────────────── */
     .markdown-section .tip {
       border-left-color: var(--notice-tip-border-color);
@@ -452,6 +461,7 @@
       color: var(--alert-color);
     }
 
+    /* masthead:block resize-handle */
     /* ── Sidebar resize handle ─────────────────────────────
          4px strip at the right edge, transparent until hover.
          Narrow enough that the nav's scrollbar (≥7px on every
@@ -472,6 +482,7 @@
       background: var(--resize-handle-color, var(--sidebar-nav-link-color--active));
     }
 
+    /* masthead:block theme-toggle */
     /* ── Theme toggle pill (injected into sidebar header) ──
          `margin-left: auto` puts it at the right of the flex row
          regardless of how wide the app-name is; `flex: none` keeps
@@ -532,6 +543,7 @@
       color: var(--toggle-active-color);
     }
 
+    /* masthead:block sidebar-layout */
     /* ── Sidebar layout ──────────────────────────────────────
          Canonical working pattern. Do NOT deviate from these rules
          without reading the commentary below — every one of them
@@ -623,6 +635,7 @@
       word-break: break-word;
     }
 
+    /* masthead:block sidebar-nav */
     /* ── Sidebar nav polish ────────────────────────────────── */
     .sidebar-nav li a {
       transition: color 0.2s ease;
@@ -647,6 +660,7 @@
       padding-right: 12px !important;
     }
 
+    /* masthead:block misc-layout */
     /* ── Misc layout ───────────────────────────────────────── */
     @media screen and (min-width: 768px) {
       .sidebar-toggle { display: none; }
@@ -657,7 +671,69 @@
     @media screen and (max-width: 767px) {
       .content .markdown-section { padding-top: 3.5rem; }
     }
+    /* masthead:block page-toc-style */
+    /* ── Page contents rail ────────────────────────────────
+         The current page's headings in a column beside the content, on
+         screens wide enough for a third column. The pageToc plugin builds
+         it. Below 1280px the column would squeeze the content, so the rail
+         stays hidden there, and in print. The top padding clears the
+         80px source-link corner. */
+    :root {
+      --page-toc-width:                    220px;
+      --page-toc-link-color:               var(--sidebar-nav-link-color);
+      --page-toc-link-color--active:       var(--sidebar-nav-link-color--active);
+      /* Darkened in light mode: plain alucard-comment is 4.4:1 on the page. */
+      --page-toc-title-color:              light-dark(color-mix(in srgb, var(--alucard-comment) 80%, black), color-mix(in srgb, var(--dracula-comment) 50%, white));
+      --page-toc-border-color:             var(--search-border-color);
+    }
+    .page-toc { display: none; }
+    @media screen and (min-width: 1280px) {
+      body.has-page-toc .content { padding-right: var(--page-toc-width); }
+      .page-toc {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: var(--page-toc-width);
+        overflow-y: auto;
+        padding: 88px 12px 24px 0;
+        box-shadow: inset 1px 0 0 var(--page-toc-border-color);
+        font-size: 0.85rem;
+        line-height: 1.35;
+      }
+    }
+    .page-toc-title {
+      margin: 0 0 8px;
+      padding-left: 16px;
+      color: var(--page-toc-title-color);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    /* Rows indent by nesting depth (--depth, set per row), and the active
+       row's left border sits on the rail's own edge. */
+    .page-toc a {
+      display: block;
+      padding: 3px 0 3px calc(14px + var(--depth, 0) * 12px);
+      border-left: 2px solid transparent;
+      color: var(--page-toc-link-color);
+      text-decoration: none;
+      overflow-wrap: anywhere;
+      transition: color 0.2s ease;
+    }
+    .page-toc a:hover {
+      color: var(--page-toc-link-color--active);
+    }
+    .page-toc a.active {
+      color: var(--page-toc-link-color--active);
+      border-left-color: var(--page-toc-link-color--active);
+      font-weight: 500;
+    }
+    /* masthead:block host-corner */
 {{GITLAB_CORNER_CSS}}  </style>
+  <!-- masthead:block theme-script -->
   <script>
     // Theme: honor saved preference, then system preference, then dark
     (function() {
@@ -687,6 +763,7 @@
 <body class="notranslate" translate="no">
   <div id="app"></div>
 
+  <!-- masthead:block config -->
   <script>
     window.$docsify = {
       name: '{{PROJECT_NAME}}',
@@ -738,6 +815,7 @@
         }
       },
       plugins: [
+        // masthead:block chrome
         function(hook) {
           hook.ready(function() {
             var sidebar = document.querySelector('.sidebar');
@@ -850,6 +928,7 @@
             }
           });
         },
+        // masthead:block search-plain-text
         // The search plugin indexes each block's raw markdown (token.text), so
         // its results show link syntax, backticks, and tags, and a linked or HTML
         // heading slugs to an id no heading has. Hand search a lexer whose
@@ -913,6 +992,7 @@
             window.marked = Object.assign(function () { return marked.apply(this, arguments); }, marked, { lexer: lexer });
           });
         },
+        // masthead:block svg-links
         // docsify scrolls to a ?id= target only for a click it saw land on an
         // HTML link: it tests tagName === 'A', and a link inside an SVG reports
         // 'a'. A chart whose rows link to entries on the same page (an SVG
@@ -933,6 +1013,7 @@
             });
           });
         },
+        // masthead:block deep-link-settle
         // docsify measures a ?id= target once, before the mermaid diagrams and
         // images above it reach their rendered size, so a deep link lands short
         // by their combined height. Once they have, and docsify's own scroll
@@ -973,6 +1054,7 @@
             })();
           });
         },
+        // masthead:block mermaid-links
         // docsify scrolls to a ?id= heading only when the click's target, or
         // its parent, has tagName 'A'. A mermaid `click` link is an SVG <a>
         // (tagName 'a') around a label <p>, so docsify takes the hash change
@@ -994,11 +1076,93 @@
               link.remove();
             });
           });
+        },
+        // masthead:block page-toc
+        // The page-contents rail: a row for each h2 to h4 on the page, linking
+        // to #/<route>?id=<id> so docsify scrolls to it as it does for any
+        // heading link. A row is labelled from a clone of its heading with
+        // injected tools removed, never from the heading's HTML: a heading
+        // whose text is a link would put that outbound link in the rail.
+        // Rows indent by nesting, not by tag level, so an h4 straight under an
+        // h2 sits one step in. The highlighted row is the last heading whose
+        // top has passed the top of the window. `pageToc: false` in $docsify
+        // turns the rail off; a page that re-renders its headings dispatches
+        // `masthead:content-changed` on document to rebuild it.
+        function pageToc(hook) {
+          var MIN_ROWS = 2;
+          var rail = null, rows = [], scheduled = false;
+          function highlight() {
+            scheduled = false;
+            if (!rows.length) return;
+            var line = (window.$docsify.topMargin || 0) + 8;
+            var current = rows[0];
+            for (var i = 0; i < rows.length; i++) {
+              if (rows[i].heading.getBoundingClientRect().top > line + 1) break;
+              current = rows[i];
+            }
+            rows.forEach(function (row) { row.link.classList.toggle('active', row === current); });
+            // Keep the highlighted row in view inside the rail, never by scrolling the page.
+            var top = current.link.offsetTop, bottom = top + current.link.offsetHeight;
+            if (top < rail.scrollTop) rail.scrollTop = top - 8;
+            else if (bottom > rail.scrollTop + rail.clientHeight) rail.scrollTop = bottom - rail.clientHeight + 8;
+          }
+          function schedule() {
+            if (scheduled) return;
+            scheduled = true;
+            requestAnimationFrame(highlight);
+          }
+          function build() {
+            if (rail) rail.remove();
+            rail = null;
+            rows = [];
+            document.body.classList.remove('has-page-toc');
+            if (window.$docsify.pageToc === false) return;
+            var route = location.hash.split('?')[0] || '#/';
+            var stack = [];
+            var entries = [];
+            document.querySelectorAll('.markdown-section h2[id], .markdown-section h3[id], .markdown-section h4[id]').forEach(function (heading) {
+              var label = heading.cloneNode(true);
+              label.querySelectorAll('button, svg, [aria-hidden="true"]').forEach(function (el) { el.remove(); });
+              var text = label.textContent.trim();
+              if (!text) return;
+              var level = Number(heading.tagName.charAt(1));
+              while (stack.length && stack[stack.length - 1] >= level) stack.pop();
+              entries.push({ heading: heading, text: text, depth: stack.length });
+              stack.push(level);
+            });
+            if (entries.length < MIN_ROWS) return;
+            rail = document.createElement('nav');
+            rail.className = 'page-toc';
+            rail.setAttribute('aria-label', 'On this page');
+            var title = document.createElement('p');
+            title.className = 'page-toc-title';
+            title.textContent = 'On this page';
+            rail.appendChild(title);
+            entries.forEach(function (entry) {
+              var link = document.createElement('a');
+              link.href = route + '?id=' + encodeURIComponent(entry.heading.id);
+              link.textContent = entry.text;
+              link.style.setProperty('--depth', entry.depth);
+              rail.appendChild(link);
+              rows.push({ heading: entry.heading, link: link });
+            });
+            document.body.appendChild(rail);
+            document.body.classList.add('has-page-toc');
+            highlight();
+          }
+          hook.doneEach(build);
+          hook.mounted(function () {
+            window.addEventListener('scroll', schedule, { passive: true });
+            window.addEventListener('resize', schedule);
+            document.addEventListener('masthead:content-changed', build);
+          });
         }
+        // masthead:block config-close
       ]
     };
   </script>
 
+  <!-- masthead:block scripts -->
   <!-- Docsify core -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
   <!-- Search (renders in sidebar by default) -->

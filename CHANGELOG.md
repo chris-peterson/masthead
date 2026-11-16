@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **`/masthead:update-docs` brings an existing hub up to date.** It carries the template's fixes and features into a site made earlier while keeping the edits made to the site since, and asks when both changed the same part. It also checks the sidebar and pages for the problems that break docsify sites: mixed sidebar forms, entries that share an href, sections on the home route, links that 404 on the host (including letter-case mismatches), relative links without `relativePath`, headings pushed into the sidebar, pages nothing links to, and a missing favicon. Each finding comes with the fix and the reasoning behind it, and nothing changes until you approve it.
+- **A page-contents rail.** On a wide screen, each page lists its headings in a column on the right and highlights the one you're reading. Turn it off with `pageToc: false`.
+- **Sites are stamped with the template they came from**, so the next update can tell the template's changes from the site's own.
+
+### Changed
+
+- **Bootstrap points at `/masthead:update-docs`** when `docs/index.html` already exists, instead of asking you to diff the template by hand.
+
 ## 0.2.0
 
 ### Added

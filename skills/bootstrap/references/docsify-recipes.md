@@ -232,6 +232,10 @@ Pass the file's contents as the function to Playwright MCP's `browser_evaluate` 
 
 ### Build the page-contents rail from ids, not from heading HTML
 
+The template ships a rail built this way (the `pageToc` plugin; see
+[the template notes](docsify-template.md#page-contents-rail)). What follows is
+why, and what to add when a site's rail needs more than headings.
+
 `docsify-plugin-toc` copies each heading's `innerHTML` into its row. On a heading whose text is a link, the in-page anchor docsify renders is empty and the text is the outbound link, so the copied row links off-site. Anything a plugin appended to the heading (copy-link or source buttons) rides along too. When a site has such headings, build the rail itself from each heading's `id` and text:
 
 - **Rows link to `#/<route>?id=<id>`**, labelled from a clone of the heading with the appended tools removed.
