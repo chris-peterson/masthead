@@ -185,8 +185,8 @@ usually wants the namespace URL.
 taking the project and host from the origin remote:
 
 ```bash
-python3 skills/bootstrap/scripts/gitlab_pages.py status            # site URL, unique domain on/off, deployments
-python3 skills/bootstrap/scripts/gitlab_pages.py unique-domain off  # serve at the namespace URL
+python3 skills/init-docs/scripts/gitlab_pages.py status            # site URL, unique domain on/off, deployments
+python3 skills/init-docs/scripts/gitlab_pages.py unique-domain off  # serve at the namespace URL
 ```
 
 - **Reading** is `GET /projects/:id/pages`, which returns `url`,

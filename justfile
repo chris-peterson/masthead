@@ -13,7 +13,7 @@ default:
 try:
     claude --plugin-dir .
 
-# Run the script tests (bootstrap scaffold, update, announcements)
+# Run the script tests (init scaffold, update, announcements)
 [group('check your work')]
 test:
     python3 -m unittest discover -s tests
@@ -21,7 +21,7 @@ test:
 # Record the docsify template in its history, after changing it
 [group('check your work')]
 record-template:
-    python3 skills/bootstrap/scripts/docsify/template_blocks.py record
+    python3 skills/init-docs/scripts/docsify/template_blocks.py record
 
 # Regenerate the artifacts and list what the projection job would commit
 [group('check your work')]

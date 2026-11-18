@@ -1,4 +1,4 @@
-"""Tests for the docsify scaffold (skills/bootstrap/scripts/docsify/bootstrap.py)
+"""Tests for the docsify scaffold (skills/init-docs/scripts/docsify/init.py)
 and the announce script, run against throwaway git repos.
 
     python3 -m unittest discover -s tests
@@ -14,7 +14,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-BOOTSTRAP = ROOT / "skills" / "bootstrap" / "scripts" / "docsify" / "bootstrap.py"
+INIT = ROOT / "skills" / "init-docs" / "scripts" / "docsify" / "init.py"
 ANNOUNCE = ROOT / "scripts" / "announce.sh"
 
 
@@ -43,7 +43,7 @@ class Repo:
 
     def run(self, *flags):
         return subprocess.run(
-            [sys.executable, str(BOOTSTRAP), str(self.path), *flags],
+            [sys.executable, str(INIT), str(self.path), *flags],
             capture_output=True, text=True,
         )
 
@@ -54,7 +54,7 @@ class Repo:
         self.tmp.cleanup()
 
 
-class BootstrapTest(unittest.TestCase):
+class InitTest(unittest.TestCase):
     def setUp(self):
         self.repo = Repo()
         self.addCleanup(self.repo.close)
@@ -179,7 +179,7 @@ class BootstrapTest(unittest.TestCase):
 
     def test_not_a_repo(self):
         with tempfile.TemporaryDirectory() as d:
-            r = subprocess.run([sys.executable, str(BOOTSTRAP), d], capture_output=True, text=True)
+            r = subprocess.run([sys.executable, str(INIT), d], capture_output=True, text=True)
             self.assertNotEqual(r.returncode, 0)
             self.assertIn("not a git repository", r.stderr)
 
@@ -314,7 +314,7 @@ class AnnounceTest(unittest.TestCase):
                 self.assertEqual(r.stdout, "")
 
 
-GITLAB_PAGES = ROOT / "skills" / "bootstrap" / "scripts" / "gitlab_pages.py"
+GITLAB_PAGES = ROOT / "skills" / "init-docs" / "scripts" / "gitlab_pages.py"
 
 FAKE_GLAB = """#!/bin/sh
 printf '%s\\n' "$@" > "$GLAB_ARGS"

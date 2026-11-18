@@ -13,16 +13,16 @@ features, such as the page-contents rail, and the site's sidebar and pages may
 have drifted from the practices the engine reference describes. This skill
 finds both, shows the user each change, and applies only what they approve.
 
-Use `/masthead:bootstrap` instead when the repo has no hub yet.
+Use `/masthead:init-docs` instead when the repo has no hub yet.
 
 ## How this skill is split
 
-As with bootstrap, the engine's script does the mechanical work, and you
+As with init-docs, the engine's script does the mechanical work, and you
 handle the judgment:
 
 | Engine | Update script | Reference |
 |--------|---------------|-----------|
-| docsify | `skills/bootstrap/scripts/docsify/update.py` | [the docsify reference](../bootstrap/references/docsify.md) |
+| docsify | `skills/init-docs/scripts/docsify/update.py` | [the docsify reference](../init-docs/references/docsify.md) |
 
 The script reports and never writes unless `--apply` is passed. It reports two
 things:
@@ -39,11 +39,11 @@ things:
 ## 1. Run the report
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/docsify/update.py" [REPO_PATH] --diff
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/init-docs/scripts/docsify/update.py" [REPO_PATH] --diff
 ```
 
 Pass `--docs DIR` when the site lives somewhere other than `docs/`. The script
-stops when there's no docsify hub (point the user at `/masthead:bootstrap`) and
+stops when there's no docsify hub (point the user at `/masthead:init-docs`) and
 when another tool builds the site (name the tool and stop: masthead doesn't
 update a site it doesn't own).
 
@@ -83,7 +83,7 @@ which to keep:
 Once the user has approved the changes:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/docsify/update.py" [REPO_PATH] --apply [--resolve <block>=site|template ...]
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/init-docs/scripts/docsify/update.py" [REPO_PATH] --apply [--resolve <block>=site|template ...]
 ```
 
 ### An unstamped site: one unclassified diff
@@ -91,7 +91,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/docsify/update.py" [REPO
 A site made before stamps existed, made by hand, or stamped by a newer masthead
 than this one comes back as a single diff from the current template. Classify
 each hunk yourself, reading it against
-[the template notes](../bootstrap/references/docsify-template.md):
+[the template notes](../init-docs/references/docsify-template.md):
 
 - **A fix or feature the site lacks:** the template's side of the hunk matches
   a rule the notes explain, or it's a block the site doesn't have at all.
@@ -102,7 +102,7 @@ List the hunks for the user in those two groups. After they approve, replace
 the file with the current template and re-apply each local edit by hand:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/docsify/update.py" [REPO_PATH] --apply --adopt
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/init-docs/scripts/docsify/update.py" [REPO_PATH] --apply --adopt
 ```
 
 The site is stamped now, so the next update classifies its blocks, and the
@@ -114,7 +114,7 @@ If a local edit fixes a defect the template still has, such as a contrast
 failure, a layout bug, or a broken link behavior, the defect belongs to the
 template. Keep the edit, and suggest opening an issue against masthead so the
 fix reaches every site
-([why](../bootstrap/references/docsify.md#a-defect-in-a-generated-site-is-a-template-defect-until-shown-otherwise)).
+([why](../init-docs/references/docsify.md#a-defect-in-a-generated-site-is-a-template-defect-until-shown-otherwise)).
 
 ## 3. Fix the findings
 
@@ -131,12 +131,12 @@ sidebar entries with the same mistake) into one proposal.
 | `LINT-06` | Relative links on a site without `relativePath: true` | Take the template's config (step 2), or make the links absolute |
 | `LINT-07` | `subMaxLevel` puts page headings in the sidebar | Set it to `0`; the page-contents rail lists a page's headings |
 | `LINT-08` | No sidebar entry reaches a page | Put it through the audience test first (below) |
-| `LINT-09` | No `docs/favicon.svg` | Design one ([bootstrap, step 7](../bootstrap/SKILL.md)) |
+| `LINT-09` | No `docs/favicon.svg` | Design one ([init-docs, step 7](../init-docs/SKILL.md)) |
 
 A page no sidebar entry reaches isn't automatically a missing sidebar entry. Ask
-of it what bootstrap asks of every page: could someone who only uses what the
+of it what init-docs asks of every page: could someone who only uses what the
 repo ships, with no checkout, act on it
-([bootstrap, step 4](../bootstrap/SKILL.md))?
+([init-docs, step 4](../init-docs/SKILL.md))?
 If yes, add it to the sidebar where a new reader needs it. If no, tell the user
 where it belongs, and announce it so the plugin that places content for that
 audience can pick it up:
@@ -152,9 +152,9 @@ Don't move or delete the page yourself.
 The script checks only what it can check without judgment. Look over the rest
 the reference describes while you're in the files, and propose what applies:
 lists a reader jumps between that should be headings
-([structure pages as headings](../bootstrap/references/docsify.md#structure-pages-as-headings)),
+([structure pages as headings](../init-docs/references/docsify.md#structure-pages-as-headings)),
 a home page without a quickstart or a warning callout
-([bootstrap, step 5](../bootstrap/SKILL.md)), and a
+([init-docs, step 5](../init-docs/SKILL.md)), and a
 sidebar out of the order a new reader needs.
 
 ## 4. Verify
@@ -162,10 +162,10 @@ sidebar out of the order a new reader needs.
 Re-run the report. What's left should be local edits and any findings the user
 chose to keep.
 
-Then check the site in a browser, as bootstrap does: serve it (`just docs`),
+Then check the site in a browser, as init-docs does: serve it (`just docs`),
 open every sidebar entry, since a docsify 404 renders inside a page that
 loaded fine, and run the search and contrast checks
-([verifying the site](../bootstrap/references/docsify.md#verifying-the-site)).
+([verifying the site](../init-docs/references/docsify.md#verifying-the-site)).
 After a template update, look at a long page on a wide window too: the rail
 should list its headings and follow the scroll.
 

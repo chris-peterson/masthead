@@ -1,4 +1,4 @@
-"""Tests for the docsify update script (skills/bootstrap/scripts/docsify/update.py)
+"""Tests for the docsify update script (skills/init-docs/scripts/docsify/update.py)
 and the template history it reads, run against throwaway git repos.
 
     python3 -m unittest discover -s tests -k test_update
@@ -13,10 +13,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from test_bootstrap import Repo
+from test_init import Repo
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL = ROOT / "skills" / "bootstrap"
+SKILL = ROOT / "skills" / "init-docs"
 SCRIPTS = SKILL / "scripts" / "docsify"
 UPDATE = SCRIPTS / "update.py"
 TEMPLATE_BLOCKS = SCRIPTS / "template_blocks.py"
@@ -36,7 +36,7 @@ class Plugin:
     def __init__(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
-        self.skill = self.root / "skills" / "bootstrap"
+        self.skill = self.root / "skills" / "init-docs"
         shutil.copytree(SCRIPTS, self.skill / "scripts" / "docsify")
         (self.skill / "assets" / "docsify").mkdir(parents=True)
         self.template = self.skill / "assets" / "docsify" / "index.html"
@@ -102,7 +102,7 @@ class UpdateTemplateTest(unittest.TestCase):
         old = edit_block(old, "search", ".sidebar {", ".sidebar { /* old search */")
         self.current = current
         self.plugin.use(old)
-        r = run(self.plugin.script("bootstrap.py"), self.repo.path)
+        r = run(self.plugin.script("init.py"), self.repo.path)
         self.assertEqual(r.returncode, 0, r.stderr)
         self.repo.write("docs/favicon.svg", "<svg/>")
         self.plugin.use(current)
@@ -199,10 +199,10 @@ class UpdateRefusesTest(unittest.TestCase):
         self.repo = Repo()
         self.addCleanup(self.repo.close)
 
-    def test_no_hub_points_at_bootstrap(self):
+    def test_no_hub_points_at_init_docs(self):
         r = run(UPDATE, self.repo.path)
         self.assertEqual(r.returncode, 2)
-        self.assertIn("/masthead:bootstrap", r.stderr)
+        self.assertIn("/masthead:init-docs", r.stderr)
 
     def test_another_owner(self):
         self.repo.write("mkdocs.yml", "site_name: x\n")

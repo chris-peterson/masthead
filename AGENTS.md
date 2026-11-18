@@ -10,14 +10,17 @@ out for.
 
 ```text
 plugin.yml           the plugin's descriptor; plugin.json is generated from it
-skills/bootstrap/    /masthead:bootstrap: SKILL.md is the engine-neutral flow;
+skills/init-docs/    /masthead:init-docs: SKILL.md is the engine-neutral flow;
                      scripts/<engine>/, assets/<engine>/, and
                      references/<engine>*.md are one engine's adapter;
                      scripts/gitlab_pages.py reads and sets a GitLab
                      project's Pages domain
 skills/update-docs/  /masthead:update-docs: brings an existing hub current;
                      its script is the engine's update.py under
-                     skills/bootstrap/scripts/<engine>/
+                     skills/init-docs/scripts/<engine>/
+skills/docs/         /masthead:docs: finds the hub's engine and loads that
+                     adapter's references for work on a site; routes
+                     standing one up or updating it to the two skills above
 scripts/announce.sh  prints masthead's interop announcements (content.routed)
 tests/               unit tests for the scripts (`just test`)
 docs/                masthead's own docs site; hand-written pages are tracked,
@@ -36,7 +39,7 @@ The tests run the scripts against throwaway git repos, so they need `git` and
 
 The docsify template is split into named blocks by `masthead:block` marker
 comments, and every template a site may have been made from is kept in
-`skills/bootstrap/assets/docsify/template-history.json`. After changing the
+`skills/init-docs/assets/docsify/template-history.json`. After changing the
 template, run `just record-template`; the tests fail until you do. Keep the
 markers, and give a new concern its own block.
 

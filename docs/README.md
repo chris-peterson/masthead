@@ -15,14 +15,14 @@ The hub runs on the docs engine you choose. docsify is the one engine today.
 In a session inside the repo, run:
 
 ```text
-/masthead:bootstrap
+/masthead:init-docs
 ```
 
 It writes the site under `docs/`, adds a deploy when the repo has no CI yet,
 and goes through the docs you already have to decide which ones belong in the
 hub. Pages written for maintainers or agents stay out, and you're told where
 they belong. What it does step by step is on the
-[bootstrap page](/skills/bootstrap).
+[init-docs page](/skills/init-docs).
 
 ## Keeping it current
 
@@ -41,9 +41,9 @@ each problem it finds. Nothing changes until you approve it. Details are on the
 [update-docs page](/skills/update-docs).
 
 > [!WARNING]
-> Bootstrap stops rather than overwrite a docs site that already exists: one
+> init-docs stops rather than overwrite a docs site that already exists: one
 > built by another tool, or a `docs/index.html` that's already there. Use
-> `/masthead:update-docs` on an existing site. Bootstrap's `--force` replaces
+> `/masthead:update-docs` on an existing site. Passing `--force` to init-docs replaces
 > `docs/index.html` and drops any changes made to it.
 >
 > A site made before update-docs existed carries no stamp, so update-docs can't tell

@@ -1,12 +1,12 @@
 # The docsify template, and why it's built this way
 
-The canonical site is **`assets/docsify/index.html`**, a real file rather than a fenced copy. `scripts/docsify/bootstrap.py` copies it verbatim and substitutes a handful of placeholders. Edit `assets/docsify/index.html` directly; never regenerate it by paraphrase.
+The canonical site is **`assets/docsify/index.html`**, a real file rather than a fenced copy. `scripts/docsify/init.py` copies it verbatim and substitutes a handful of placeholders. Edit `assets/docsify/index.html` directly; never regenerate it by paraphrase.
 
 This document is the consolidated record of **why** each non-obvious rule exists, so an edit doesn't regress a fix that has bitten before. The same warnings live as inline comments in the file; this page is the index you read before touching the styles.
 
 ## What the script substitutes
 
-Everything else in the template ships as-is. `bootstrap.py` fills only these:
+Everything else in the template ships as-is. `init.py` fills only these:
 
 | Placeholder | Filled with | Source |
 |-------------|-------------|--------|
@@ -29,7 +29,7 @@ Each language becomes one tag, after the search/alerts/copy-code plugins:
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
 ```
 
-`bash` and `yaml` are always included; `json` is highlighted by Prism core and needs no plugin. The full extension→language map lives in `bootstrap.py` (`EXT_TO_PRISM`).
+`bash` and `yaml` are always included; `json` is highlighted by Prism core and needs no plugin. The full extension→language map lives in `init.py` (`EXT_TO_PRISM`).
 
 ## Blocks
 

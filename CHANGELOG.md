@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **`/masthead:docs` loads what masthead knows about your hub's docs engine.** Reach for it (typing `/docs` finds it) when working on a hub: writing pages and navigation that render, fixing the theme, adding a recipe, or tracing a defect back to the template. It finds the engine from the site's files, and hands standing up or updating a hub to the skills that do it.
+
+### Changed
+
+- **`/masthead:bootstrap` is now `/masthead:init-docs`**, pairing it with `/masthead:update-docs`. Its docsify script is now `init.py`.
+
 ## 0.3.0
 
 ### Added

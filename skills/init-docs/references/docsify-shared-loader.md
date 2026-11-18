@@ -4,7 +4,7 @@ Read this when several repos' docs sites should share one look: one titlebar,
 one theme, one set of fixes, loaded from a central site instead of each repo
 carrying its own copy of the template.
 
-That is a different shape from what `/masthead:bootstrap` scaffolds. The
+That is a different shape from what `/masthead:init-docs` scaffolds. The
 standalone template copies the whole site into each repo, so each site keeps the
 template as it was the day it was made. A shared loader keeps one script on a
 central site, and each repo's `docs/index.html` is a few lines that load it:

@@ -45,12 +45,14 @@ suite:
   pitch: "Your repo has docs but no front door? Raise a hub readers can find, with a deploy that publishes it on every push."
   what: "Stands up a documentation hub for a repo: home page, navigation, search, and a deploy that publishes it on every push. It sorts the docs the repo already has by audience, so the hub holds what end users need and the rest is pointed to where maintainers and agents look. The docs engine is an adapter, so the hub isn't tied to one tool; docsify is the engine today. Pages are written for the person who comes next: how the thing works, and what to watch out for. A hub made earlier is brought up to date with the template's fixes and features, keeping the site's own edits, and its sidebar and pages are checked against the engine's practices."
   cmds:
-    - ["/masthead:bootstrap", "Stand up a docs hub for a repo, with a deploy"]
+    - ["/masthead:init-docs", "Stand up a docs hub for a repo, with a deploy"]
     - ["/masthead:update-docs", "Bring an existing hub up to date with the template and the docs practices"]
+    - ["/masthead:docs", "Load what masthead knows about the hub's docs engine, for work on a site"]
   # >>> shipyard:describe — generated from source by `shipyard gen-describe`; do not edit >>>
   describe:
     skills:
-      bootstrap: This skill should be used when the user wants a documentation hub for a repo, such as "/masthead:bootstrap", "set up a docs site for this repo", "give this project a pages site", "bootstrap docsify here", "publish these docs to GitHub Pages", or "add a docs hub".
+      docs: This skill should be used when work touches a repo's documentation hub, such as "/masthead:docs", "/docs", "why is the docs sidebar doing this", "add a plugin to the docs site", "fix search on the docs site", "the docs theme fails contrast", "deep links land in the wrong place", or editing the site files or pages of a hub (a docsify `docs/index.html`, `docs/_sidebar.md`, and the pages it renders).
+      init-docs: This skill should be used when the user wants a documentation hub for a repo, such as "/masthead:init-docs", "set up a docs site for this repo", "give this project a pages site", "bootstrap docsify here", "init the docs", "publish these docs to GitHub Pages", or "add a docs hub".
       update-docs: This skill should be used when the user wants an existing documentation hub brought up to date, such as "/masthead:update-docs", "update the docs site", "this docsify site needs the latest fixes", "fix the sidebar on our docs", "add a table of contents to the docs", or "check the docs hub against best practices".
   # <<< shipyard:describe <<<
 

@@ -1,6 +1,6 @@
 # The docsify engine
 
-What `/masthead:bootstrap` does on docsify, and what to know when writing pages
+What `/masthead:init-docs` does on docsify, and what to know when writing pages
 for a docsify hub. Read this after picking docsify as the engine.
 
 A docsify hub is a single `docs/index.html` that renders the markdown files
@@ -25,7 +25,7 @@ as it is.
 ## The script
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/docsify/bootstrap.py" [REPO_PATH] [flags]
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/init-docs/scripts/docsify/init.py" [REPO_PATH] [flags]
 ```
 
 `REPO_PATH` defaults to the current directory. The script checks that it's a
@@ -324,7 +324,7 @@ use those keys, and the search box is always visible.
 `scripts/docsify/update.py` is the script behind `/masthead:update-docs`:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/docsify/update.py" [REPO_PATH] [flags]
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/init-docs/scripts/docsify/update.py" [REPO_PATH] [flags]
 ```
 
 | Flag | When |

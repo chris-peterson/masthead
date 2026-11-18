@@ -18,7 +18,7 @@ below its category's heading, so every requirement has a linkable anchor
 - **Hub**: the documentation site for the people who use what the repo ships.
 - **Engine**: the tool that renders the hub (docsify today).
 - **Adapter**: one engine's script, template, and reference page, which plug
-  that engine into the engine-neutral bootstrap flow.
+  that engine into the engine-neutral init-docs flow.
 - **Audience**: who a piece of documentation is for: end users, maintainers,
   or agents. Decided by one test: could someone who only uses what the repo
   ships, with no checkout, act on it?
@@ -311,7 +311,7 @@ Updating an existing hub (`/masthead:update-docs`)
 
 #### `UPDATE-01`
 If the repo has no hub one of masthead's adapters recognizes, then
-`/masthead:update-docs` shall say so, point at `/masthead:bootstrap`, and write
+`/masthead:update-docs` shall say so, point at `/masthead:init-docs`, and write
 nothing.
 
 #### `UPDATE-02`

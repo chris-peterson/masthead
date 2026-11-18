@@ -1,11 +1,11 @@
 ---
-name: bootstrap
+name: init-docs
 disable-model-invocation: true
-description: This skill should be used when the user wants a documentation hub for a repo, such as "/masthead:bootstrap", "set up a docs site for this repo", "give this project a pages site", "bootstrap docsify here", "publish these docs to GitHub Pages", or "add a docs hub". Scaffolds the hub on the docs engine the user picks (docsify today) with a home page, navigation, search, and a deploy that publishes it on every push, then sorts the repo's existing docs by audience so only end-user pages go in it.
+description: This skill should be used when the user wants a documentation hub for a repo, such as "/masthead:init-docs", "set up a docs site for this repo", "give this project a pages site", "bootstrap docsify here", "init the docs", "publish these docs to GitHub Pages", or "add a docs hub". Scaffolds the hub on the docs engine the user picks (docsify today) with a home page, navigation, search, and a deploy that publishes it on every push, then sorts the repo's existing docs by audience so only end-user pages go in it.
 argument-hint: "[repo path] [engine]"
 ---
 
-# Bootstrap
+# Init docs
 
 Stand up a documentation hub for a repo: a site for the people who use what the
 repo ships, with a deploy that publishes it on every push.
@@ -33,7 +33,7 @@ The mechanical scaffold is done by a script; the judgment stays with you.
 
 | Engine | Script | Template | Reference |
 |--------|--------|----------|-----------|
-| docsify | `scripts/docsify/bootstrap.py` | `assets/docsify/index.html` | [references/docsify.md](references/docsify.md) |
+| docsify | `scripts/docsify/init.py` | `assets/docsify/index.html` | [references/docsify.md](references/docsify.md) |
 
 A new engine adds a row: a script under `scripts/<engine>/` that takes the same
 inputs (repo path, `--name`, `--host`, `--repo-url`) and ends with the same
@@ -71,7 +71,7 @@ The docsify script checks all of these and refuses rather than overwriting.
 ## 3. Run the scaffold
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/docsify/bootstrap.py" [REPO_PATH] [flags]
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/init-docs/scripts/docsify/init.py" [REPO_PATH] [flags]
 ```
 
 The flags and what each file holds are in
@@ -92,7 +92,7 @@ project setting, so change it only once the user says to, after the first
 deploy:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/scripts/gitlab_pages.py" unique-domain off --repo [REPO_PATH]
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/init-docs/scripts/gitlab_pages.py" unique-domain off --repo [REPO_PATH]
 ```
 
 It needs the Maintainer or Owner role; when the user doesn't have it, the

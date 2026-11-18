@@ -1,5 +1,6 @@
 - [Home](/)
-- [masthead:bootstrap](/skills/bootstrap)
+- [masthead:init-docs](/skills/init-docs)
 - [masthead:update-docs](/skills/update-docs)
+- [masthead:docs](/skills/docs)
 - [Who the hub is for](/audiences)
 - [Events](/events)

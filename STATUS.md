@@ -16,17 +16,17 @@ that implements them.
 
 | Prefix | Count | Status | Notes |
 |--------|------:|--------|-------|
-| ENGINE-01..04 | 4 | All Covered | `skills/bootstrap/SKILL.md` (How this skill is split; 1. Pick the engine) |
-| SCAFFOLD-01..15 | 15 | All Covered | `skills/bootstrap/scripts/docsify/bootstrap.py` (`main`, `other_owner`, `detect_host_and_url`, `render_index`, `detect_langs`, `uses_mermaid`, `seed_sidebar`, `seed_readme`, `ensure_justfile`, `detect_spec`, `ignore_spec_copy`); theme and site features in `skills/bootstrap/assets/docsify/index.html` |
-| SCAFFOLD-16..17 | 2 | All Covered | `skills/bootstrap/scripts/docsify/template_blocks.py` (`generator`, `fingerprint`); `bootstrap.py` (`main`); the `page-toc` and `page-toc-style` blocks of `assets/docsify/index.html` |
-| AUDIENCE-01..06 | 6 | All Covered | `skills/bootstrap/SKILL.md` (4. Sort the existing docs by audience) |
-| EVENTS-01..03 | 3 | All Covered | `scripts/announce.sh`; `skills/bootstrap/SKILL.md` (step 4) |
-| CONTENT-01..04 | 4 | All Covered | `skills/bootstrap/SKILL.md` (steps 5 to 8) |
-| PUBLISH-01..14 | 14 | All Covered | `skills/bootstrap/scripts/docsify/bootstrap.py` (`write_ci`, `gitlab_pages_job`, `pages_links`, `gitlab_namespace_site`, `profile_page`, `main`); `skills/bootstrap/scripts/gitlab_pages.py`; `skills/bootstrap/references/ci-integration.md`; `skills/bootstrap/SKILL.md` (steps 3 and 9) |
-| CHECK-01..04 | 4 | All Covered | `skills/bootstrap/SKILL.md` (10. Preview and verify); `skills/bootstrap/scripts/docsify/check-search.js`, `check-contrast.js` |
-| MAINTAIN-01..02 | 2 | All Covered | `skills/bootstrap/scripts/docsify/bootstrap.py` (`main`, `--force`); `skills/bootstrap/SKILL.md` (When the hub needs changes later) |
-| UPDATE-01..12 | 12 | All Covered | `skills/bootstrap/scripts/docsify/update.py` (`main`, `recover_values`, `compare_template`, `classify`, `merge`, `stamp`); `template_blocks.py` (`split_blocks`, `record`, `template_blocks`); `skills/update-docs/SKILL.md` (UPDATE-05's classification, UPDATE-06's choice, UPDATE-09 to UPDATE-12); `tests/test_update.py` |
-| LINT-01..09 | 9 | All Covered | `skills/bootstrap/scripts/docsify/update.py` (`find_issues`, `parse_sidebar`, `resolve`, `exists_exact`, `links`); `tests/test_update.py` (`FindingsTest`) |
+| ENGINE-01..04 | 4 | All Covered | `skills/init-docs/SKILL.md` (How this skill is split; 1. Pick the engine) |
+| SCAFFOLD-01..15 | 15 | All Covered | `skills/init-docs/scripts/docsify/init.py` (`main`, `other_owner`, `detect_host_and_url`, `render_index`, `detect_langs`, `uses_mermaid`, `seed_sidebar`, `seed_readme`, `ensure_justfile`, `detect_spec`, `ignore_spec_copy`); theme and site features in `skills/init-docs/assets/docsify/index.html` |
+| SCAFFOLD-16..17 | 2 | All Covered | `skills/init-docs/scripts/docsify/template_blocks.py` (`generator`, `fingerprint`); `init.py` (`main`); the `page-toc` and `page-toc-style` blocks of `assets/docsify/index.html` |
+| AUDIENCE-01..06 | 6 | All Covered | `skills/init-docs/SKILL.md` (4. Sort the existing docs by audience) |
+| EVENTS-01..03 | 3 | All Covered | `scripts/announce.sh`; `skills/init-docs/SKILL.md` (step 4) |
+| CONTENT-01..04 | 4 | All Covered | `skills/init-docs/SKILL.md` (steps 5 to 8) |
+| PUBLISH-01..14 | 14 | All Covered | `skills/init-docs/scripts/docsify/init.py` (`write_ci`, `gitlab_pages_job`, `pages_links`, `gitlab_namespace_site`, `profile_page`, `main`); `skills/init-docs/scripts/gitlab_pages.py`; `skills/init-docs/references/ci-integration.md`; `skills/init-docs/SKILL.md` (steps 3 and 9) |
+| CHECK-01..04 | 4 | All Covered | `skills/init-docs/SKILL.md` (10. Preview and verify); `skills/init-docs/scripts/docsify/check-search.js`, `check-contrast.js` |
+| MAINTAIN-01..02 | 2 | All Covered | `skills/init-docs/scripts/docsify/init.py` (`main`, `--force`); `skills/init-docs/SKILL.md` (When the hub needs changes later) |
+| UPDATE-01..12 | 12 | All Covered | `skills/init-docs/scripts/docsify/update.py` (`main`, `recover_values`, `compare_template`, `classify`, `merge`, `stamp`); `template_blocks.py` (`split_blocks`, `record`, `template_blocks`); `skills/update-docs/SKILL.md` (UPDATE-05's classification, UPDATE-06's choice, UPDATE-09 to UPDATE-12); `tests/test_update.py` |
+| LINT-01..09 | 9 | All Covered | `skills/init-docs/scripts/docsify/update.py` (`find_issues`, `parse_sidebar`, `resolve`, `exists_exact`, `links`); `tests/test_update.py` (`FindingsTest`) |
 
 Requirements that SKILL.md carries (AUDIENCE, CONTENT, CHECK-01, CHECK-04,
 PUBLISH-09, PUBLISH-10's README link, PUBLISH-12's confirmation,

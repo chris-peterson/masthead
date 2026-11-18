@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Scaffold a docsify hub into a target repo: the deterministic half of
-/masthead:bootstrap on the docsify engine.
+/masthead:init-docs on the docsify engine.
 
 This script owns everything mechanical: detect the source host, default branch,
 languages, Mermaid usage, and SPEC.md; copy assets/docsify/index.html verbatim
@@ -22,7 +22,7 @@ another tool already owns the repo's docs site, or if docs/index.html exists and
 leaving a half-configured site.
 
 Usage:
-  bootstrap.py [REPO_PATH] [--name NAME] [--host github|gitlab]
+  init.py [REPO_PATH] [--name NAME] [--host github|gitlab]
                [--repo-url URL] [--langs l1,l2,...] [--force] [--previews]
 """
 

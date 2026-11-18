@@ -44,11 +44,11 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote
 
-import bootstrap
+import init
 import template_blocks as tb
 
-REFERENCE = "skills/bootstrap/references/docsify.md"
-BOOTSTRAP_SKILL = "skills/bootstrap/SKILL.md"
+REFERENCE = "skills/init-docs/references/docsify.md"
+INIT_SKILL = "skills/init-docs/SKILL.md"
 RULES = {
     "LINT-02": (REFERENCE, "Pick one form per level"),
     "LINT-03": (REFERENCE, "Give every entry its own href"),
@@ -56,8 +56,8 @@ RULES = {
     "LINT-05": (REFERENCE, "Match file names case-exactly"),
     "LINT-06": (REFERENCE, "Writing links"),
     "LINT-07": (REFERENCE, "Give every entry its own href"),
-    "LINT-08": (BOOTSTRAP_SKILL, "4. Sort the existing docs by audience"),
-    "LINT-09": (BOOTSTRAP_SKILL, "7. Design the icon"),
+    "LINT-08": (INIT_SKILL, "4. Sort the existing docs by audience"),
+    "LINT-09": (INIT_SKILL, "7. Design the icon"),
 }
 
 STATUS_TEXT = {
@@ -81,7 +81,7 @@ def die(msg):
 
 def recover_values(repo, site):
     """The substitutions the template was rendered with, read back from the
-    site. Falls back to what bootstrap would detect for anything the site
+    site. Falls back to what init.py would detect for anything the site
     doesn't say."""
     def find(pattern):
         m = re.search(pattern, site, re.MULTILINE)
@@ -89,21 +89,21 @@ def recover_values(repo, site):
 
     url = find(r"^\s*repo:\s*'([^']*)'")
     if url is None:
-        url = bootstrap._to_https(bootstrap.git(repo, "remote", "get-url", "origin"))
+        url = init._to_https(init.git(repo, "remote", "get-url", "origin"))
     name = find(r"^\s*name:\s*'((?:[^'\\]|\\.)*)'")
     if name is None:
-        name = bootstrap._org_and_name(url or "")[1] or repo.name
+        name = init._org_and_name(url or "")[1] or repo.name
     if ".github-corner svg { display: none; }" in site:
         host = "gitlab"
     else:
-        host = bootstrap._host_of(url or "") or "github"
+        host = init._host_of(url or "") or "github"
     langs = re.findall(r"prismjs@1/components/prism-([\w-]+)\.min\.js", site)
     mermaid = bool(re.search(r"<script[^>]+src=\"[^\"]*mermaid[^\"]*\.js\"", site))
     return {"name": name, "url": url or "", "host": host, "langs": langs, "mermaid": mermaid}
 
 
 def render(template_text, v):
-    return bootstrap.render_index(
+    return init.render_index(
         template_text, v["name"], v["url"], v["host"], v["langs"], v["mermaid"], "masthead"
     )
 
@@ -381,7 +381,7 @@ def find_issues(repo, docs, site_text):
     out = []
     rel = lambda p: p.relative_to(repo).as_posix()
     docs_rel = docs.relative_to(repo).as_posix()
-    spec = bootstrap.detect_spec(repo)
+    spec = init.detect_spec(repo)
     has_config = site_text is not None and "window.$docsify" in site_text
 
     def check_target(src, line, target, page_dir):
@@ -578,15 +578,15 @@ def main():
     args = ap.parse_args()
 
     repo = Path(args.repo).resolve()
-    if not bootstrap.git(repo, "rev-parse", "--git-dir"):
+    if not init.git(repo, "rev-parse", "--git-dir"):
         die(f"{repo} is not a git repository")
-    owner = bootstrap.other_owner(repo)
+    owner = init.other_owner(repo)
     if owner:
         die(f"this repo's docs site is built by {owner}, not masthead; update it there.")
     docs = (repo / args.docs).resolve()
     index = docs / "index.html"
     if not index.is_file() or "docsify" not in index.read_text(encoding="utf-8", errors="ignore"):
-        die(f"no docsify hub at {args.docs}/index.html. To stand one up, use /masthead:bootstrap.")
+        die(f"no docsify hub at {args.docs}/index.html. To stand one up, use /masthead:init-docs.")
 
     report, site, state = compare_template(repo, index)
     resolutions = parse_resolutions(args.resolve)
