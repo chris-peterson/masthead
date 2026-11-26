@@ -132,6 +132,7 @@ sidebar entries with the same mistake) into one proposal.
 | `LINT-07` | `subMaxLevel` puts page headings in the sidebar | Set it to `0`; the page-contents rail lists a page's headings |
 | `LINT-08` | No sidebar entry reaches a page | Put it through the audience test first (below) |
 | `LINT-09` | No `docs/favicon.svg` | Design one ([init-docs, step 7](../init-docs/SKILL.md)) |
+| `LINT-10` | A sidebar entry written `[**X**](path)` | Move the bold outside the link: `**[X](path)**` |
 
 A page no sidebar entry reaches isn't automatically a missing sidebar entry. Ask
 of it what init-docs asks of every page: could someone who only uses what the

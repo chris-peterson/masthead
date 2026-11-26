@@ -6,7 +6,7 @@ Maintained by `/sextant:spec-status`.
 **Last audit:** 2026-11-25
 **Spec version:** unversioned
 **Plugin version:** 0.2.0
-**Coverage:** 75 Covered, 0 Partial, 0 Missing/Contradicts
+**Coverage:** 76 Covered, 0 Partial, 0 Missing/Contradicts
 
 The first 42 requirements were reverse-engineered from the code as it stood at
 v0.1.0. SCAFFOLD-15 and PUBLISH-06 through PUBLISH-14 were added with the change
@@ -26,7 +26,7 @@ that implements them.
 | CHECK-01..04 | 4 | All Covered | `skills/init-docs/SKILL.md` (10. Preview and verify); `skills/init-docs/scripts/docsify/check-search.js`, `check-contrast.js` |
 | MAINTAIN-01..02 | 2 | All Covered | `skills/init-docs/scripts/docsify/init.py` (`main`, `--force`); `skills/init-docs/SKILL.md` (When the hub needs changes later) |
 | UPDATE-01..12 | 12 | All Covered | `skills/init-docs/scripts/docsify/update.py` (`main`, `recover_values`, `compare_template`, `classify`, `merge`, `stamp`); `template_blocks.py` (`split_blocks`, `record`, `template_blocks`); `skills/update-docs/SKILL.md` (UPDATE-05's classification, UPDATE-06's choice, UPDATE-09 to UPDATE-12); `tests/test_update.py` |
-| LINT-01..09 | 9 | All Covered | `skills/init-docs/scripts/docsify/update.py` (`find_issues`, `parse_sidebar`, `resolve`, `exists_exact`, `links`); `tests/test_update.py` (`FindingsTest`) |
+| LINT-01..10 | 10 | All Covered | `skills/init-docs/scripts/docsify/update.py` (`find_issues`, `parse_sidebar`, `resolve`, `exists_exact`, `links`); `tests/test_update.py` (`FindingsTest`) |
 
 Requirements that SKILL.md carries (AUDIENCE, CONTENT, CHECK-01, CHECK-04,
 PUBLISH-09, PUBLISH-10's README link, PUBLISH-12's confirmation,
@@ -45,6 +45,11 @@ different granularity, add `**Evidence pointers:** line` (or `anchor`, `file`,
 `directory`) to the metadata block above.
 
 ## Audit history
+
+### 2026-11-25: Linked section headings
+
+Added LINT-10 (a sidebar entry written `[**X**](path)`), implemented alongside
+the template's support for `**[X](path)**` section headings.
 
 ### 2026-11-25: Events against the suite contract
 

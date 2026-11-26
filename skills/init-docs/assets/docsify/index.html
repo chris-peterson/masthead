@@ -659,6 +659,39 @@
       padding-left: 16px !important;
       padding-right: 12px !important;
     }
+    /* A linked section heading, `**[Section](/path)**`. The heading already
+       carries the gutter, so the link inside it takes neither padding nor
+       chevron (otherwise it starts at 32px). It keeps the label's look and
+       takes the link colors on hover and when its page is open; docsify puts
+       `.active` on the <strong>. The chrome plugin restores the title docsify
+       reads off the uppercased label. */
+    .sidebar-nav li > strong > a {
+      padding: 0 !important;
+      background: none !important;
+      color: inherit;
+      font-weight: inherit !important;
+    }
+    /* The theme's -25px right margin on a label assumes its own 25px sidebar
+       padding. With that zeroed, a label overflows the nav, and focusing the
+       link inside it scrolls the whole nav sideways. */
+    .sidebar-nav li > strong {
+      margin-right: 0 !important;
+    }
+    .sidebar-nav li > strong > a:hover,
+    .sidebar-nav li > strong.active > a {
+      color: var(--sidebar-nav-link-color--active);
+    }
+    /* With no items under it, a linked heading is a page link, not a
+       section: it keeps the space above that sets it apart from the section
+       before it, and drops the rule and uppercase. */
+    .sidebar-nav li:not(:has(> ul)) > strong:has(> a:only-child) {
+      margin-bottom: 0 !important;
+      padding-top: 4px;
+      padding-bottom: 4px;
+      border: 0 !important;
+      font-size: inherit;
+      text-transform: none;
+    }
 
     /* masthead:block misc-layout */
     /* ── Misc layout ───────────────────────────────────────── */
@@ -922,6 +955,15 @@
             });
           });
           hook.doneEach(function() {
+            // docsify titles each sidebar link, and the page, from the link's
+            // rendered text, so a link inside an uppercased `**Section**`
+            // label lends its uppercase to both. Put back the text as written.
+            document.querySelectorAll('.sidebar-nav strong > a').forEach(function(a) {
+              var text = a.textContent.trim();
+              if (a.title === text || a.title !== a.innerText.trim()) return;
+              if (document.title === a.title) document.title = text;
+              a.title = text;
+            });
             if (typeof mermaid !== 'undefined') {
               mermaid.initialize({ startOnLoad: false, theme: getMermaidTheme(), look: 'handDrawn' });
               mermaid.run({ querySelector: '.mermaid' });

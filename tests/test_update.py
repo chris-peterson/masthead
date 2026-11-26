@@ -250,6 +250,23 @@ class FindingsTest(unittest.TestCase):
         self.assertIn(("LINT-05", "docs/_sidebar.md", 9), got)
         self.assertEqual(len(got), 5, got)
 
+    def test_linked_section_headings(self):
+        self.repo.write("docs/changelog.md", "# Changelog\n")
+        self.repo.write("docs/guides/README.md", "# Guides\n")
+        self.repo.write("docs/guides/install.md", "# Install\n")
+        self.repo.write("docs/_sidebar.md", "\n".join([
+            "- [Home](/README.md)",
+            "- **[Changelog](/changelog.md)**",   # a linked heading: fine
+            "- **[Guides](/guides/)**",           # a linked heading with items ...
+            "  - [Install](/guides/install.md)",
+            "  - [Overview](/guides/)",           # ... that share its href
+            "- [**Bold**](/changelog.md)",        # the bold inside the link
+        ]) + "\n")
+        got = self.findings()
+        self.assertIn(("LINT-03", "docs/_sidebar.md", 5), got)
+        self.assertIn(("LINT-10", "docs/_sidebar.md", 6), got)
+        self.assertEqual(len(got), 2, got)
+
     def test_page_links_and_reach(self):
         self.repo.write("docs/_sidebar.md", "- [Home](/README.md)\n- [Guides](/guides/)\n")
         self.repo.write("docs/guides/README.md", "# Guides\n\n[Setup](setup)\n")

@@ -404,3 +404,8 @@ sidebar entry reaches.
 
 #### `LINT-09`
 The docsify update script shall report a site with no `docs/favicon.svg`.
+
+#### `LINT-10`
+The docsify update script shall report a sidebar entry whose bold sits inside
+its link (`[**X**](path)`), which renders as a bold link rather than a linked
+section heading (`**[X](path)**`).

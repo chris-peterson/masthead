@@ -230,15 +230,25 @@ For a section with too many children to show inline, give it
 children. Pointing a section at `/?id=foo` instead makes it expand on every
 visit to the home page, since it shares the home route's path.
 
-### A clickable section header fights the collapse plugin
+### A linked section heading
 
-A header that is a label, a link, and a collapsible parent at once runs into
-each layer in turn: `[**X**](path)` loses the section styling (use
-`**[X](path)**`), the nav anchor's padding indents it, and one click both
-navigates and collapses. On a small sidebar, consider dropping
-`docsify-sidebar-collapse` instead: then `**[X](path)**` is a static header that
-navigates. Sites that work pick one: no collapse plugin and flat links, or the
-plugin with top-level page links whose children are anchors into that page.
+To make a section heading open a page, put the link inside the bold:
+
+```markdown
+- **[Guides](/guides/)**
+  - [Install](/guides/install.md)
+- **[Changelog](/changelog.md)**
+```
+
+With items under it, it looks like any `**Section**` label and takes the link
+colors on hover and while its page is open. With none, it renders as a bold page
+link, without the label's rule or uppercase. Either way the page title and the
+link's tooltip keep the case you wrote. The other order, `[**X**](path)`, is a
+bold link, not a heading (`LINT-10`).
+
+The collapse plugin still treats a heading with items as a folder: a click on
+it while its page is open collapses the items under it. If that gets in the
+way on a small sidebar, drop `docsify-sidebar-collapse`.
 
 ## Spec-driven repos
 
@@ -355,6 +365,7 @@ Its findings, each tied to a section of this page:
 | `LINT-07` | `subMaxLevel` above 0 |
 | `LINT-08` | A page no sidebar entry reaches, directly or through the pages it links |
 | `LINT-09` | No `docs/favicon.svg` |
+| `LINT-10` | A sidebar entry written `[**X**](path)`, a bold link, where a heading `**[X](path)**` was meant |
 
 ## More
 

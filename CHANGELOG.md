@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- **A sidebar section heading can be a link.** `**[Section](/path)**` now lines up with every other entry instead of starting 16px further in, takes the link colors on hover and while its page is open, and with no items under it renders as a bold page link rather than an empty section. The page title and the link's tooltip keep the case you wrote, where they used to come out in the label's uppercase. `/masthead:update-docs` carries the fix into existing hubs, and flags `[**Section**](/path)`, which renders as a bold link rather than a heading (`LINT-10`).
 - **The suite's events page names where `content.routed` comes from.** The declaration now points at `/masthead:init-docs` and says `/masthead:update-docs` sends it too, and a test fails if the skill stops announcing the key it declares.
 
 ## 0.3.0

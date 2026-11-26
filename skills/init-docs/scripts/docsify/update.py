@@ -58,6 +58,7 @@ RULES = {
     "LINT-07": (REFERENCE, "Give every entry its own href"),
     "LINT-08": (INIT_SKILL, "4. Sort the existing docs by audience"),
     "LINT-09": (INIT_SKILL, "7. Design the icon"),
+    "LINT-10": (REFERENCE, "A linked section heading"),
 }
 
 STATUS_TEXT = {
@@ -344,7 +345,8 @@ def exists_exact(docs, rel):
 
 def parse_sidebar(text):
     """Sidebar entries as dicts: line, depth, kind (label, link, text), href,
-    parent (index or None), children (indexes)."""
+    parent (index or None), children (indexes), and bold_link when the bold is
+    inside the link (`[**X**](path)`) rather than around it."""
     items, stack = [], []  # stack of (indent, index)
     for no, line in enumerate(text.split("\n"), 1):
         m = re.match(r"^(\s*)[-*+]\s+(.*\S)\s*$", line)
@@ -363,7 +365,8 @@ def parse_sidebar(text):
         else:
             kind = "text"
         item = {"line": no, "depth": len(stack), "kind": kind,
-                "href": link.group(2) if link else None, "parent": parent, "children": []}
+                "href": link.group(2) if link else None, "parent": parent, "children": [],
+                "bold_link": bool(re.match(r"^\[\*\*.*\*\*\]\(", body))}
         items.append(item)
         if parent is not None:
             items[parent]["children"].append(len(items) - 1)
@@ -420,7 +423,11 @@ def find_issues(repo, docs, site_text):
                                    "this level mixes `**Section**` labels with linked sections that have children; "
                                    "they render as different kinds of thing"))
         for it in items:
-            if it["kind"] == "link" and it["children"]:
+            if it["bold_link"]:
+                out.append(finding("LINT-10", src, it["line"],
+                                   "the bold is inside the link, so docsify renders a bold link rather than a "
+                                   "section heading; write `**[Section](path)**`"))
+            if it["href"] and it["kind"] in ("link", "label") and it["children"]:
                 seen = {it["href"]: it["line"]}
                 for c in it["children"]:
                     href = items[c]["href"]
