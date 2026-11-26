@@ -31,8 +31,10 @@ events:
         and decided it belongs to another audience instead: maintainers (build
         steps, repo layout, anything that needs a checkout to act on) or agents
         (instructions for whoever is changing the code). Fires once per piece of
-        content masthead turns away, so the agent can hand it to whoever places
+        content masthead turns away, from /masthead:init-docs or
+        /masthead:update-docs, so the agent can hand it to whoever places
         content for that audience
+      emitted_by: skills/init-docs/SKILL.md
       fields:
         tier: the audience the content belongs to, agent or maintainer
         path: the file the content was in, or would have gone to, relative to the repo root

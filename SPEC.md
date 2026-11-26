@@ -171,12 +171,14 @@ announcement for it, carrying `tier` (`agent` or `maintainer`), `path`, `title`
 where there is one, and `reason`.
 
 #### `EVENTS-02`
-An announcement shall be one stdout line, `codes.bridgeai.masthead/<entity>.<event>`
-followed by a JSON body, so field values may hold spaces, quotes, and newlines.
+An announcement shall be the line bridge.ai WIRE-01..05 define
+([SPEC.md](https://github.com/chris-peterson/claude-marketplace/blob/main/SPEC.md)),
+under the `masthead` namespace, so field values may hold spaces, quotes, and
+newlines.
 
 #### `EVENTS-03`
-If an announcement call is malformed or its body can't be encoded, then
-`announce.sh` shall print nothing on stdout, explain on stderr, and exit 0.
+`announce.sh` shall be the publisher script of bridge.ai EMIT-06 and EMIT-07: a
+malformed call prints nothing on stdout, explains on stderr, and exits 0.
 
 ### `CONTENT`
 Hub content

@@ -6,6 +6,7 @@ and the announce script, run against throwaway git repos.
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -286,6 +287,29 @@ class InitTest(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(self.repo.read("docs/README.md"), "# Mine\n")
         self.assertEqual(self.repo.read("docs/_sidebar.md"), "- [Mine](/README.md)\n")
+
+
+class DeclaredPublishesTest(unittest.TestCase):
+    """The suite's catalog pairs keys from plugin.yml alone, so a key renamed in
+    the skill and not in the declaration would leave a subscriber listening for a
+    key masthead no longer prints (bridge.ai CHECK-01). Read without a YAML
+    parser, since the suite runs on the standard library alone."""
+
+    def declared(self):
+        text = (ROOT / "plugin.yml").read_text()
+        block = text.split("\n  publishes:\n", 1)[1].split("\n\n", 1)[0]
+        keys = re.findall(r"^    - key: (\S+)$", block, re.MULTILINE)
+        emitters = re.findall(r"^      emitted_by: (\S+)$", block, re.MULTILINE)
+        self.assertEqual(len(keys), len(emitters), "each publishes entry needs an emitted_by")
+        return list(zip(keys, emitters))
+
+    def test_each_declared_key_is_announced_where_declared(self):
+        declared = self.declared()
+        self.assertTrue(declared)
+        for key, emitted_by in declared:
+            with self.subTest(key=key):
+                source = (ROOT / emitted_by).read_text()
+                self.assertRegex(source, rf"announce\.sh\"? {re.escape(key)}\b")
 
 
 @unittest.skipUnless(shutil.which("jq"), "announce.sh needs jq")

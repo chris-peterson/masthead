@@ -10,6 +10,10 @@
 
 - **`/masthead:bootstrap` is now `/masthead:init-docs`**, pairing it with `/masthead:update-docs`. Its docsify script is now `init.py`.
 
+### Fixed
+
+- **The suite's events page names where `content.routed` comes from.** The declaration now points at `/masthead:init-docs` and says `/masthead:update-docs` sends it too, and a test fails if the skill stops announcing the key it declares.
+
 ## 0.3.0
 
 ### Added
